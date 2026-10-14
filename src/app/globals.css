@@ -534,3 +534,12 @@ button { cursor: pointer; }
 .map-tools .tool[aria-pressed="true"] { background: var(--sindoor); color: #fff8ef; }
 .sheet-body::-webkit-scrollbar { width: 8px; }
 .sheet-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
+
+/* Search bar: no red underline */
+.search-bar { border-bottom: 0; }
+
+/* Number badges: white ring between the red disc and its outer ring */
+.side .stop-num,
+.side .row.open .stop-num { box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px var(--sindoor); }
+.side .stop-num.must,
+.side .row.open .stop-num.must { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--holud); }
