@@ -79,6 +79,8 @@ const st = (id: string, label: string, bn: string, lat: number, lng: number, sta
  * station entrances; nudge them in Google Maps if a pin looks off.
  */
 export const METRO_STATIONS: Area[] = [
+  st("m-baranagar", "Baranagar", "বরানগর", 22.6455, 88.3772),
+  st("m-noapara", "Noapara", "নোয়াপাড়া", 22.6409, 88.3887),
   st("m-dumdum", "Dum Dum", "দমদম", 22.6213, 88.393),
   st("m-belgachia", "Belgachia", "বেলগাছিয়া", 22.6061, 88.3807),
   st("m-shyambazar", "Shyambazar", "শ্যামবাজার", 22.6007, 88.3727),
@@ -107,6 +109,8 @@ const ar = (id: string, label: string, bn: string, lat: number, lng: number): Ar
 
 /** Localities, for people starting from home or a para rather than a station. */
 export const LOCALITIES: Area[] = [
+  ar("a-baranagar", "Baranagar", "বরানগর", 22.643, 88.377),
+  ar("a-baguiati", "Baguiati / Kestopur", "বাগুইআটি", 22.614, 88.428),
   ar("a-laketown", "Lake Town", "লেকটাউন", 22.6035, 88.4015),
   ar("a-dumdumpark", "Dum Dum Park", "দমদম পার্ক", 22.6105, 88.411),
   ar("a-saltlake", "Salt Lake", "সল্টলেক", 22.585, 88.41),

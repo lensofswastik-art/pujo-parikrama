@@ -24,7 +24,8 @@ type View = "list" | "detail" | "roads";
 /** "Near you" radius, and how far we'll still suggest a must-see. */
 const NEARBY_M = 3000;
 const ATTRACTION_M = 8000;
-const MAX_NEARBY = 15;
+const MAX_NEARBY = 40;
+const FIRST_SHOWN = 12;
 
 const MODES: { value: Mode; label: string; hint: string }[] = [
   { value: "smart", label: "Best mix", hint: "Walk short hops, ride the long ones" },
@@ -54,13 +55,14 @@ export default function Planner() {
   const [showZones, setShowZones] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [fitTick, setFitTick] = useState(0);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => { const s = slotNow(); setSlot(s); setShowZones(SLOT_INFO[s].restricted); }, []);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 4200); return () => clearTimeout(t); }, [toast]);
 
   const beginAt = useCallback((s: Start) => {
     setStart(s);
-    setSelectedId(null); setView("list");
+    setSelectedId(null); setView("list"); setShowAll(false);
     setFitTick((t) => t + 1);
   }, []);
 
@@ -88,13 +90,15 @@ export default function Planner() {
   }, [beginAt]);
 
   /* ── Pandals sorted by how close they are — each one routed directly from the start ── */
-  const { nearby, attractions } = useMemo(() => {
-    if (!start) return { nearby: [] as Pandal[], attractions: [] as Pandal[] };
+  const { nearby, attractions, radius } = useMemo(() => {
+    if (!start) return { nearby: [] as Pandal[], attractions: [] as Pandal[], radius: NEARBY_M };
     // Same walking-distance estimate the rows show (straight line × 1.35 for Kolkata's lanes).
     const withD = PANDALS.map((p) => ({ p, d: dist(start, p) * 1.35 })).sort((a, b) => a.d - b.d);
-    const nearby = withD.filter((x) => x.d <= NEARBY_M).slice(0, MAX_NEARBY).map((x) => x.p);
-    const attractions = withD.filter((x) => x.p.mustSee && x.d > NEARBY_M && x.d <= ATTRACTION_M && !nearby.includes(x.p)).map((x) => x.p);
-    return { nearby, attractions };
+    // Dense paras get a 3 km circle; sparser ones (e.g. Dum Dum metro) widen to 5 km.
+    const radius = withD.filter((x) => x.d <= NEARBY_M).length >= 20 ? NEARBY_M : 5000;
+    const nearby = withD.filter((x) => x.d <= radius).slice(0, MAX_NEARBY).map((x) => x.p);
+    const attractions = withD.filter((x) => x.p.mustSee && x.d > radius && x.d <= ATTRACTION_M && !nearby.includes(x.p)).map((x) => x.p);
+    return { nearby, attractions, radius };
   }, [start]);
   const ranked = useMemo(() => [...nearby, ...attractions], [nearby, attractions]);
 
@@ -183,7 +187,7 @@ export default function Planner() {
                 <h2>{start ? "কাছের পুজো" : "পুজো পরিক্রমা ২০২৬"}</h2>
                 <p className="sum" aria-live="polite">
                   {start
-                    ? <><b>{nearby.length} pandals</b> within {NEARBY_M / 1000} km of {start.label}</>
+                    ? <><b>{nearby.length} pandals</b> within {radius / 1000} km of {start.label}</>
                     : <>Pick your metro station or area to see the nearest pandals and how to reach each one.</>}
                 </p>
               </div>
@@ -229,11 +233,14 @@ export default function Planner() {
                 )}
                 {nearby.length > 0 && (
                   <ol className="near">
-                    {nearby.map((p, i) => (
+                    {nearby.slice(0, showAll ? nearby.length : FIRST_SHOWN).map((p, i) => (
                       <PandalRow key={p.id} p={p} n={i + 1} leg={legs.get(p.id)!} open={activeId === p.id}
                         onSelect={() => selectPandal(p.id)} onDetail={() => openDetail(p.id)} />
                     ))}
                   </ol>
+                )}
+                {!showAll && nearby.length > FIRST_SHOWN && (
+                  <button className="show-more" onClick={() => setShowAll(true)}>Show {nearby.length - FIRST_SHOWN} more nearby pandals</button>
                 )}
                 {attractions.length > 0 && (
                   <>
@@ -254,7 +261,7 @@ export default function Planner() {
       </div>
 
       <div className="map-wrap">
-        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} showZones={showZones} fitKey={fitKey} onSelect={onMapSelect} />
+        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} focusId={selectedId} showZones={showZones} fitKey={fitKey} onSelect={onMapSelect} />
         <div className="map-tools" hidden={snap === "full"}>
           <button className="tool" aria-pressed={showZones} onClick={() => setShowZones((z) => !z)} aria-label="Show no-vehicle zones" title="No-vehicle zones">
             <IBarricade />
@@ -301,7 +308,9 @@ function PandalRow({ p, n, leg, open, onSelect, onDetail }: {
         <span className={`stop-num${p.mustSee ? " must" : ""}`} aria-hidden="true">{bn(n)}</span>
         <span className="row-text">
           <span className="stop-name">{p.name}</span>
-          <span className={`stop-theme${p.theme ? "" : " tba"}`}>{p.theme ?? "Theme yet to be revealed"}</span>
+          {p.theme
+            ? <span className="stop-theme">{p.theme}</span>
+            : <span className="stop-theme loc">{p.locality}</span>}
         </span>
         <span className="row-go">
           <b>{fmtDist(leg.distM)}</b>
@@ -335,7 +344,7 @@ function Detail({ p, slot, start, leg, onBack }: { p: Pandal; slot: Slot; start:
   return (
     <div className="detail">
       <button className="back" onClick={onBack}><IBack width={16} />Back</button>
-      <div className="bn-big">{p.nameBn}</div>
+      {p.nameBn && <div className="bn-big">{p.nameBn}</div>}
       <h3>{p.name}</h3>
       <p className="detail-loc">{p.locality}{start ? `, ${fmtDist(dist(start, p))} from ${start.label}` : ""}</p>
       <div className="theme-block">

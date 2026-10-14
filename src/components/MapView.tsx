@@ -20,6 +20,8 @@ interface Props {
   plan: Plan | null;
   start: Pt | null;
   selectedId: string | null;
+  /** Only an explicit tap reframes the map; the default highlight doesn't. */
+  focusId?: string | null;
   showZones: boolean;
   fitKey: string;
   onSelect: (id: string) => void;
@@ -51,10 +53,10 @@ const zonesFC: FC = {
 function sheetPadding() {
   const mobile = window.innerWidth < 900;
   const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 200;
-  return mobile ? { top: 170, bottom: snap + 30, left: 36, right: 36 } : { top: 60, bottom: 60, left: 60, right: 60 };
+  return mobile ? { top: 190, bottom: snap + 40, left: 36, right: 36 } : { top: 60, bottom: 60, left: 460, right: 60 };
 }
 
-export default function MapView({ pandals, plan, start, selectedId, showZones, fitKey, onSelect }: Props) {
+export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, fitKey, onSelect }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef<Map<string, { m: maplibregl.Marker; el: HTMLDivElement }>>(new Map());
@@ -210,7 +212,7 @@ export default function MapView({ pandals, plan, start, selectedId, showZones, f
   /* Frame the start and the selected pandal */
   useEffect(() => {
     const m = map.current;
-    const p = pandals.find((x) => x.id === selectedId);
+    const p = pandals.find((x) => x.id === focusId);
     if (!m || !p) return;
     if (start) {
       const b = new maplibregl.LngLatBounds([start.lng, start.lat], [start.lng, start.lat]).extend([p.lng, p.lat]);
@@ -219,7 +221,7 @@ export default function MapView({ pandals, plan, start, selectedId, showZones, f
       m.easeTo({ center: [p.lng, p.lat], zoom: Math.max(m.getZoom(), 15), padding: sheetPadding(), duration: 600 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [focusId]);
 
   return <div ref={box} className="map" style={{ position: "absolute", inset: 0 }} />;
 }

@@ -1,4 +1,6 @@
 import type { Pandal } from "./types";
+import { MORE_PANDALS, VERIFIED_PINS } from "./more-pandals";
+import { METRO_STATIONS } from "./parikramas";
 
 /**
  * Curated pandal data for Durga Puja 2026 (Shashthi 17 Oct → Dashami 21 Oct).
@@ -8,7 +10,7 @@ import type { Pandal } from "./types";
  * `vehicleDrop` is the closest point cabs/autos usually reach once evening no-entry kicks in;
  * treat walking distances as estimates.
  */
-export const PANDALS: Pandal[] = [
+const CURATED: Pandal[] = [
   // ───────── NORTH — Bagbazar · Kumartuli · Shobhabazar · Hatibagan ─────────
   {
     id: "bagbazar", name: "Bagbazar Sarbojanin", nameBn: "বাগবাজার সার্বজনীন",
@@ -415,6 +417,33 @@ export const PANDALS: Pandal[] = [
     vehicleDrop: { label: "Diamond Harbour Rd at Sakherbazar", walkM: 400 }, pin: "approx",
   },
 ];
+
+/** Straight-line metres between two points. */
+function metres(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371000 * Math.asin(Math.sqrt(h));
+}
+
+/** Nearest metro within ~2 km straight line, as a walking estimate. */
+function nearestMetro(p: Pandal): Pandal["metro"] {
+  let best: { station: string; d: number } | null = null;
+  for (const s of METRO_STATIONS) {
+    const d = metres(p, s);
+    if (!best || d < best.d) best = { station: s.metro?.station ?? s.label, d };
+  }
+  if (!best || best.d > 2000) return undefined;
+  return { station: best.station, walkMin: Math.max(2, Math.round((best.d * 1.35) / 70)) };
+}
+
+/** Curated pandals (with 2026 themes) on verified pins, plus the wider directory. */
+export const PANDALS: Pandal[] = [
+  ...CURATED.map((p) => {
+    const pin = VERIFIED_PINS[p.id];
+    return pin ? { ...p, lat: pin[0], lng: pin[1], pin: "verified" as const } : p;
+  }),
+  ...MORE_PANDALS,
+].map((p) => (p.metro ? p : { ...p, metro: nearestMetro(p) }));
 
 export const PANDAL_BY_ID = Object.fromEntries(PANDALS.map((p) => [p.id, p]));
 
