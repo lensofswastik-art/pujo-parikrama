@@ -42,7 +42,7 @@ export const SLOT_INFO: Record<Slot, { label: string; bn: string; hint: string; 
   morning: { label: "Morning", bn: "সকাল", hint: "6 am – noon · thinnest crowds", crowd: 0.55, restricted: false },
   afternoon: { label: "Afternoon", bn: "দুপুর", hint: "Noon – 3 pm · vehicles still move", crowd: 0.8, restricted: false },
   evening: { label: "Evening", bn: "সন্ধ্যা", hint: "3 pm – midnight · no-entry grids live", crowd: 1.25, restricted: true },
-  late: { label: "After midnight", bn: "মাঝরাত", hint: "Midnight – 4 am · lights on, lanes clear", crowd: 0.7, restricted: true },
+  late: { label: "Late night", bn: "মাঝরাত", hint: "Midnight – 4 am · lights on, lanes clear", crowd: 0.7, restricted: true },
 };
 
 export function restrictedZoneFor(p: Pt) {

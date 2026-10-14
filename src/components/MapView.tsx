@@ -1,13 +1,19 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import { useEffect, useMemo, useState } from "react";
-import { Circle, MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap } from "react-leaflet";
+import "maplibre-gl/dist/maplibre-gl.css";
+import maplibregl from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
 import type { Pandal } from "@/data/types";
 import { NO_VEHICLE_ZONES } from "@/data/parikramas";
 import { bn, type Plan, type Pt } from "@/lib/planner";
 import { legGeometry } from "@/lib/geometry";
+
+/**
+ * Free, keyless vector basemap from OpenFreeMap (OpenStreetMap data).
+ * Swap MAP_STYLE for "https://tiles.openfreemap.org/styles/bright" or "/positron" to change the look.
+ */
+const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+const KOLKATA: [number, number] = [88.37, 22.565];
 
 interface Props {
   pandals: Pandal[];
@@ -19,116 +25,195 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-const KOLKATA: [number, number] = [22.565, 88.37];
+type FC = GeoJSON.FeatureCollection;
+const empty: FC = { type: "FeatureCollection", features: [] };
 
-function iconFor(p: Pandal, order: number | null, selected: boolean) {
-  const must = p.mustSee ? " must" : "";
-  const sel = selected ? " sel" : "";
-  if (order !== null) {
-    return L.divIcon({
-      className: "mk",
-      html: `<div class="mk-num${must}${sel}"><span>${bn(order)}</span></div>`,
-      iconSize: [30, 30], iconAnchor: [15, 30],
-    });
+function circle(lng: number, lat: number, radiusM: number, steps = 48): [number, number][] {
+  const out: [number, number][] = [];
+  const dLat = radiusM / 111320;
+  const dLng = radiusM / (111320 * Math.cos((lat * Math.PI) / 180));
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    out.push([lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)]);
   }
-  return L.divIcon({ className: "mk", html: `<div class="mk-dot${must}${sel}"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] });
-}
-const startIcon = L.divIcon({ className: "mk", html: `<div class="mk-start"></div>`, iconSize: [22, 22], iconAnchor: [11, 11] });
-
-function FitBounds({ plan, start, fitKey }: { plan: Plan | null; start: Pt | null; fitKey: string }) {
-  const map = useMap();
-  useEffect(() => {
-    const pts: [number, number][] = [];
-    if (start) pts.push([start.lat, start.lng]);
-    plan?.stops.forEach((s) => pts.push([s.lat, s.lng]));
-    if (pts.length < 2) return;
-    const mobile = window.innerWidth < 900;
-    const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 168;
-    map.flyToBounds(L.latLngBounds(pts), {
-      paddingTopLeft: [40, mobile ? 300 : 60],
-      paddingBottomRight: [40, mobile ? snap + 40 : 60],
-      duration: 0.8, maxZoom: 16,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitKey]);
-  return null;
+  return out;
 }
 
-function FlyTo({ target }: { target: Pandal | undefined }) {
-  const map = useMap();
-  useEffect(() => {
-    if (target) map.panTo([target.lat, target.lng], { animate: true });
-  }, [target, map]);
-  return null;
+const zonesFC: FC = {
+  type: "FeatureCollection",
+  features: NO_VEHICLE_ZONES.map((z) => ({
+    type: "Feature",
+    properties: { label: z.label },
+    geometry: { type: "Polygon", coordinates: [circle(z.lng, z.lat, z.radiusM)] },
+  })),
+};
+
+function sheetPadding() {
+  const mobile = window.innerWidth < 900;
+  const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 200;
+  return mobile ? { top: 110, bottom: snap + 30, left: 36, right: 36 } : { top: 60, bottom: 60, left: 60, right: 60 };
 }
 
 export default function MapView({ pandals, plan, start, selectedId, showZones, fitKey, onSelect }: Props) {
-  const [lines, setLines] = useState<{ pts: [number, number][]; mode: string }[]>([]);
+  const box = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const markers = useRef<Map<string, { m: maplibregl.Marker; el: HTMLDivElement }>>(new Map());
+  const startMarker = useRef<maplibregl.Marker | null>(null);
+  const [ready, setReady] = useState(false);
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
-  const orderOf = useMemo(() => {
-    const m = new Map<string, number>();
-    plan?.stops.forEach((s, i) => m.set(s.id, i + 1));
-    return m;
-  }, [plan]);
-
+  /* Create the map once */
   useEffect(() => {
-    if (!plan || !plan.legs.length) { setLines([]); return; }
+    if (!box.current) return;
+    const m = new maplibregl.Map({
+      container: box.current,
+      style: MAP_STYLE,
+      center: KOLKATA,
+      zoom: 11.6,
+      attributionControl: { compact: true },
+      dragRotate: false,
+      pitchWithRotate: false,
+    });
+    m.touchZoomRotate.disableRotation();
+    m.on("load", () => {
+      m.addSource("zones", { type: "geojson", data: zonesFC });
+      m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#b5172b", "fill-opacity": 0.08 } });
+      m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": "#b5172b", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
+
+      m.addSource("route", { type: "geojson", data: empty });
+      m.addLayer({
+        id: "route-ride", type: "line", source: "route", filter: ["in", ["get", "mode"], ["literal", ["auto", "bus", "cab"]]],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#4a3f38", "line-width": 4.5, "line-opacity": 0.85 },
+      });
+      m.addLayer({
+        id: "route-metro", type: "line", source: "route", filter: ["==", ["get", "mode"], "metro"],
+        paint: { "line-color": "#2f7d5b", "line-width": 4, "line-dasharray": [2, 1.5] },
+      });
+      m.addLayer({
+        id: "route-walk-halo", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#fffdf8", "line-width": 9, "line-opacity": 0.85 },
+      });
+      m.addLayer({
+        id: "route-walk", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#d0121b", "line-width": 5, "line-dasharray": [0, 2] },
+      });
+      setReady(true);
+    });
+    map.current = m;
+    return () => { m.remove(); map.current = null; };
+  }, []);
+
+  /* Zones visibility */
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    const v = showZones ? "visible" : "none";
+    m.setLayoutProperty("zones-fill", "visibility", v);
+    m.setLayoutProperty("zones-line", "visibility", v);
+  }, [showZones, ready]);
+
+  /* Pandal markers: create once, restyle on plan / selection change */
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    const order = new Map<string, number>();
+    plan?.stops.forEach((s, i) => order.set(s.id, i + 1));
+    for (const p of pandals) {
+      let rec = markers.current.get(p.id);
+      if (!rec) {
+        const el = document.createElement("div");
+        el.setAttribute("role", "button");
+        el.setAttribute("tabindex", "0");
+        el.setAttribute("aria-label", p.name);
+        el.title = p.name;
+        el.addEventListener("click", (e) => { e.stopPropagation(); onSelectRef.current(p.id); });
+        el.addEventListener("keydown", (e) => { if (e.key === "Enter") onSelectRef.current(p.id); });
+        const mk = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([p.lng, p.lat]).addTo(m);
+        rec = { m: mk, el };
+        markers.current.set(p.id, rec);
+      }
+      const n = order.get(p.id);
+      const cls = `${p.mustSee ? " must" : ""}${p.id === selectedId ? " sel" : ""}`;
+      if (n) {
+        rec.el.classList.add("mk", "mk-on"); rec.el.classList.remove("mk-off");
+        rec.el.innerHTML = `<div class="mk-num${cls}"><span>${bn(n)}</span></div>`;
+        rec.m.setOffset([0, 0]);
+      } else {
+        rec.el.classList.add("mk", "mk-off"); rec.el.classList.remove("mk-on");
+        rec.el.innerHTML = `<div class="mk-dot${cls}"></div>`;
+        rec.m.setOffset([0, 7]);
+      }
+      rec.el.style.zIndex = n ? "3" : p.id === selectedId ? "4" : "1";
+    }
+  }, [pandals, plan, selectedId, ready]);
+
+  /* Start marker */
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    startMarker.current?.remove();
+    if (!start) return;
+    const el = document.createElement("div");
+    el.className = "mk-start-wrap";
+    el.innerHTML = `<div class="mk-start"></div><span class="mk-start-label"></span>`;
+    (el.querySelector(".mk-start-label") as HTMLElement).textContent = start.label ?? "Start";
+    startMarker.current = new maplibregl.Marker({ element: el, anchor: "left", offset: [-11, 0] }).setLngLat([start.lng, start.lat]).addTo(m);
+  }, [start]);
+
+  /* Route lines: straight placeholders first, then street geometry */
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    const src = m.getSource("route") as maplibregl.GeoJSONSource | undefined;
+    if (!src) return;
+    if (!plan?.legs.length) { src.setData(empty); return; }
     const ctrl = new AbortController();
-    // Draw straight placeholders immediately, then swap in street geometry as it arrives.
-    setLines(plan.legs.map((l) => ({ pts: [[l.from.lat, l.from.lng], [l.to.lat, l.to.lng]], mode: l.mode })));
+    const feats: GeoJSON.Feature[] = plan.legs.map((l) => ({
+      type: "Feature",
+      properties: { mode: l.mode },
+      geometry: { type: "LineString", coordinates: [[l.from.lng, l.from.lat], [l.to.lng, l.to.lat]] },
+    }));
+    src.setData({ type: "FeatureCollection", features: feats });
     plan.legs.forEach((l, i) => {
       if (l.mode === "metro") return;
       legGeometry(l.from, l.to, l.mode, ctrl.signal).then((pts) => {
         if (ctrl.signal.aborted) return;
-        setLines((prev) => prev.map((x, j) => (j === i ? { ...x, pts } : x)));
+        feats[i] = { ...feats[i], geometry: { type: "LineString", coordinates: pts.map(([lat, lng]) => [lng, lat]) } };
+        src.setData({ type: "FeatureCollection", features: [...feats] });
       });
     });
     return () => ctrl.abort();
-  }, [plan]);
+  }, [plan, ready]);
 
-  const selected = pandals.find((p) => p.id === selectedId);
+  /* Fit to route */
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    const pts: [number, number][] = [];
+    if (start) pts.push([start.lng, start.lat]);
+    plan?.stops.forEach((s) => pts.push([s.lng, s.lat]));
+    if (pts.length < 2) return;
+    const b = new maplibregl.LngLatBounds(pts[0], pts[0]);
+    pts.forEach((p) => b.extend(p));
+    const fit = () => { m.resize(); m.fitBounds(b, { padding: sheetPadding(), maxZoom: 16, duration: 900 }); };
+    const t = setTimeout(fit, 60);
+    if (!m.loaded()) m.once("load", fit);
+    return () => { clearTimeout(t); m.off("load", fit); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitKey]);
 
-  return (
-    <MapContainer center={KOLKATA} zoom={12} zoomControl={false} style={{ height: "100%" }} preferCanvas={false}>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        subdomains="abcd"
-        maxZoom={19}
-      />
-      {showZones && NO_VEHICLE_ZONES.map((z) => (
-        <Circle key={z.id} center={[z.lat, z.lng]} radius={z.radiusM}
-          pathOptions={{ color: "#b5172b", weight: 1.5, dashArray: "5 5", fillColor: "#b5172b", fillOpacity: 0.09 }}>
-          <Tooltip direction="top" className="mk-label">{z.label} · no vehicles {z.hours}</Tooltip>
-        </Circle>
-      ))}
-      {lines.map((l, i) => (
-        <Polyline key={i} positions={l.pts}
-          pathOptions={
-            l.mode === "walk"
-              ? { color: "#d0121b", weight: 5, dashArray: "0.1 9", lineCap: "round", opacity: 0.95 }
-              : l.mode === "metro"
-                ? { color: "#2f7d5b", weight: 4, dashArray: "10 8", opacity: 0.9 }
-                : { color: "#4a3f38", weight: 4, opacity: 0.8 }
-          } />
-      ))}
-      {start && (
-        <Marker position={[start.lat, start.lng]} icon={startIcon}>
-          <Tooltip permanent direction="right" offset={[12, 0]} className="mk-label">{start.label ?? "Start"}</Tooltip>
-        </Marker>
-      )}
-      {pandals.map((p) => {
-        const order = orderOf.get(p.id) ?? null;
-        return (
-          <Marker key={p.id} position={[p.lat, p.lng]} icon={iconFor(p, order, p.id === selectedId)}
-            zIndexOffset={order ? 1000 : 0} eventHandlers={{ click: () => onSelect(p.id) }}
-            keyboard title={p.name}>
-            <Tooltip direction="top" offset={[0, order ? -30 : -8]} className="mk-label">{p.name}</Tooltip>
-          </Marker>
-        );
-      })}
-      <FitBounds plan={plan} start={start} fitKey={fitKey} />
-      <FlyTo target={selected} />
-    </MapContainer>
-  );
+  /* Pan to selected pandal */
+  useEffect(() => {
+    const m = map.current;
+    const p = pandals.find((x) => x.id === selectedId);
+    if (!m || !p) return;
+    const pad = sheetPadding();
+    m.easeTo({ center: [p.lng, p.lat], zoom: Math.max(m.getZoom(), 15), padding: pad, duration: 600 });
+  }, [selectedId, pandals]);
+
+  return <div ref={box} className="map" style={{ position: "absolute", inset: 0 }} />;
 }

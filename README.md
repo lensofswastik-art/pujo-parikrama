@@ -31,7 +31,7 @@ npm run dev        # http://localhost:3000
 2. **Themes** — `theme: null` shows "yet to be revealed" (College Square was reported by some outlets, Md Ali Park, Chetla Agrani, Salt Lake blocks etc. not yet confirmed at build time).
 3. **No-vehicle zones** — centres and radii in `NO_VEHICLE_ZONES` are estimates around clusters, not police-drawn boundaries. Update from the Kolkata Police order / on-ground reports.
 4. **Routing server** — `routing.openstreetmap.de` is a free community server with fair-use limits. If traffic is high on Ashtami, self-host OSRM or swap in a keyed router (Mapbox/GraphHopper) in `geometry.ts`. The app falls back to straight lines if it's unavailable.
-5. **Tiles** — CARTO Voyager basemap is free for low/moderate volume; check their terms for heavy traffic.
+5. **Map** — MapLibre GL with the free, keyless OpenFreeMap "liberty" style (OpenStreetMap data). Change `MAP_STYLE` in `MapView.tsx` to `.../styles/bright` or `.../styles/positron` for a different look. Google Maps would need an API key with billing enabled.
 
 ## Data sources (Sept–Oct 2026)
 
