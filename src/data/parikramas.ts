@@ -60,6 +60,42 @@ export const PARIKRAMAS: Parikrama[] = [
   },
 ];
 
+
+export interface Area {
+  id: string;
+  label: string;
+  bn: string;
+  lat: number;
+  lng: number;
+  /** Shown as a quick-pick capsule under the search bar */
+  capsule?: boolean;
+  metro?: { station: string; walkMin: number };
+}
+
+/** Starting areas. Capsules are the common pandal-hopping bases; the rest appear when searching. */
+export const AREAS: Area[] = [
+  { id: "dumdum", label: "Dum Dum", bn: "দমদম", lat: 22.6213, lng: 88.393, capsule: true, metro: { station: "Dum Dum", walkMin: 0 } },
+  { id: "laketown", label: "Lake Town", bn: "লেকটাউন", lat: 22.6035, lng: 88.4015, capsule: true },
+  { id: "saltlake", label: "Salt Lake", bn: "সল্টলেক", lat: 22.585, lng: 88.41, capsule: true, metro: { station: "City Centre (Green)", walkMin: 8 } },
+  { id: "shyambazar", label: "Shyambazar", bn: "শ্যামবাজার", lat: 22.6007, lng: 88.3727, capsule: true, metro: { station: "Shyambazar", walkMin: 2 } },
+  { id: "kumartuli", label: "Kumartuli", bn: "কুমোরটুলি", lat: 22.5995, lng: 88.3635, capsule: true, metro: { station: "Shobhabazar Sutanuti", walkMin: 7 } },
+  { id: "college-st", label: "College Street", bn: "কলেজ স্ট্রিট", lat: 22.5747, lng: 88.3633, capsule: true, metro: { station: "MG Road", walkMin: 9 } },
+  { id: "sealdah", label: "Sealdah", bn: "শিয়ালদহ", lat: 22.5678, lng: 88.3706, capsule: true, metro: { station: "Sealdah (Green)", walkMin: 4 } },
+  { id: "kalighat", label: "Kalighat", bn: "কালীঘাট", lat: 22.5182, lng: 88.3459, capsule: true, metro: { station: "Kalighat", walkMin: 0 } },
+  { id: "gariahat", label: "Gariahat", bn: "গড়িয়াহাট", lat: 22.5181, lng: 88.3667, capsule: true },
+  { id: "behala", label: "Behala", bn: "বেহালা", lat: 22.4975, lng: 88.3165, capsule: true, metro: { station: "Behala Chowrasta (Purple)", walkMin: 2 } },
+  { id: "newtown", label: "New Town", bn: "নিউটাউন", lat: 22.5806, lng: 88.4645, capsule: true },
+  { id: "tala", label: "Tala / Belgachia", bn: "টালা", lat: 22.6061, lng: 88.3807, metro: { station: "Belgachia", walkMin: 1 } },
+  { id: "hatibagan", label: "Hatibagan", bn: "হাতিবাগান", lat: 22.5935, lng: 88.371, metro: { station: "Shyambazar", walkMin: 10 } },
+  { id: "esplanade", label: "Esplanade", bn: "এসপ্ল্যানেড", lat: 22.5646, lng: 88.3517, metro: { station: "Esplanade", walkMin: 0 } },
+  { id: "howrah", label: "Howrah station", bn: "হাওড়া", lat: 22.5839, lng: 88.3424 },
+  { id: "bhowanipore", label: "Bhowanipore", bn: "ভবানীপুর", lat: 22.53, lng: 88.348, metro: { station: "Jatin Das Park", walkMin: 6 } },
+  { id: "kasba", label: "Kasba", bn: "কসবা", lat: 22.515, lng: 88.388 },
+  { id: "new-alipore", label: "New Alipore / Chetla", bn: "নিউ আলিপুর", lat: 22.511, lng: 88.336 },
+  { id: "jadavpur", label: "Jadavpur", bn: "যাদবপুর", lat: 22.4975, lng: 88.3712 },
+  { id: "naktala", label: "Garia / Naktala", bn: "নাকতলা", lat: 22.4728, lng: 88.3655, metro: { station: "Gitanjali", walkMin: 8 } },
+];
+
 /** Starting points offered in the "Setting out from" field (besides live location and any pandal). */
 export const PLACES: { label: string; lat: number; lng: number; metro?: { station: string; walkMin: number } }[] = [
   { label: "Dum Dum metro", metro: { station: "Dum Dum", walkMin: 0 }, lat: 22.6213, lng: 88.393 },

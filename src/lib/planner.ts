@@ -154,7 +154,8 @@ export function optimiseOrder(start: Pt, stops: Pandal[], pref: Mode, slot: Slot
  * favoured, then cheapest-insertion keeps the walk tight (an orienteering heuristic).
  */
 export function fitToBudget(start: Pt, pool: Pandal[], budgetMin: number, pref: Mode, slot: Slot) {
-  const score = (p: Pandal) => (p.mustSee ? 3 : 1) + (p.theme ? 0.5 : 0) - dwellOf(p, slot) / 120;
+  // Must-sees first, then whatever is closest to where you are.
+  const score = (p: Pandal) => (p.mustSee ? 3 : 1) + (p.theme ? 0.5 : 0) - dwellOf(p, slot) / 120 + Math.max(0, 1.5 - dist(start, p) / 2000);
   const ranked = [...pool].sort((a, b) => score(b) - score(a) || road(start, a) - road(start, b));
   let route: Pandal[] = [];
   const cost = (arr: Pandal[]) => arr.reduce((s, p, i) => s + legCost(i ? arr[i - 1] : start, p, pref, slot) + dwellOf(p, slot), 0);

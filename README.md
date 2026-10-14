@@ -21,6 +21,7 @@ npm run dev        # http://localhost:3000
 | Street geometry for the map (OSRM, foot/car) | `src/lib/geometry.ts` |
 | UI | `src/components/*` |
 
+- **Start** — one search bar plus area capsules. Picking an area shows pandals within 2.5 km plus must-sees within 8 km, and plans the best order (constants `NEARBY_M` / `ATTRACTION_M` in `Planner.tsx`). Each ride leg suggests where to board an auto or bus and links to Uber, Ola and Rapido.
 - **Time budget** — picks must-sees first, then cheapest insertion until the hours run out. What doesn't fit is listed under "Didn't fit" with one-tap add.
 - **Evening restrictions** — choosing *Evening* or *After midnight* switches on the no-vehicle bubbles: cab/auto/bus legs end at the pandal's `vehicleDrop` road and add the walk.
 - **Rides** — Uber and Ola links pre-fill pickup + drop. Rapido has no public web deep link, so it opens the app/site. "Live directions" opens Google Maps for live traffic.
