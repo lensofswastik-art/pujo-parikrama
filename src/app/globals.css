@@ -373,3 +373,40 @@ button { cursor: pointer; }
 .idle-name { font-weight: 700; font-size: 15.5px; }
 .idle-theme { font-size: 14px; color: var(--sabuj-700); }
 .idle-loc { font-size: 12.5px; color: var(--kali-3); }
+
+/* ── Metro / Area switch ── */
+.picker { display: flex; align-items: center; gap: 8px; padding-top: 10px; }
+.cat { display: flex; flex: none; background: var(--sabuj-700); border-radius: 999px; padding: 3px; box-shadow: 0 2px 8px rgba(16,48,44,.18); }
+.cat button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; color: var(--sabuj-200); border-radius: 999px; padding: 5px 11px; font-size: 13.5px; font-weight: 600; }
+.cat button[aria-selected="true"] { background: var(--shola); color: var(--sabuj-700); }
+.picker .capsules { padding: 2px 2px 6px; flex: 1; min-width: 0; }
+@media (min-width: 900px) {
+  .picker { flex-direction: column; align-items: stretch; }
+  .cat { align-self: flex-start; box-shadow: none; }
+  .picker .capsules { max-height: 128px; overflow-y: auto; }
+}
+
+/* ── Nearest pandals list ── */
+.head-row { display: flex; align-items: flex-start; gap: 10px; }
+.head-row > div:first-child { flex: 1; min-width: 0; }
+.head-row .pill-menu { left: auto; right: 0; }
+.near { list-style: none; margin: 0; padding: 4px 12px 0; }
+.group-h { font-size: 14.5px; color: var(--kali-2); margin: 18px 18px 4px; }
+.row { border-radius: var(--r-m); }
+.row.open { background: var(--shola-2); }
+.row-main { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; text-align: left; padding: 10px 8px; }
+.row-main .stop-num { margin-top: 0; flex: none; }
+.row-text { flex: 1; min-width: 0; display: grid; }
+.row-text .stop-name { font-size: 16px; }
+.row-text .stop-theme { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-go { flex: none; display: grid; justify-items: end; font-size: 12.5px; color: var(--kali-3); }
+.row-go b { font-size: 14.5px; color: var(--kali); }
+.row-go span { display: inline-flex; align-items: center; gap: 3px; }
+.row-more { padding: 0 10px 12px 54px; }
+.how { margin: 0 0 6px; font-size: 14px; line-height: 1.4; color: var(--kali-2); }
+.how-warn { margin: 0 0 8px; font-size: 13px; line-height: 1.4; color: var(--sindoor-deep); }
+.ride.gm { background: var(--sabuj-700); border-color: var(--sabuj-700); color: var(--shola); }
+.ride.more-info { cursor: pointer; }
+.steps-box { margin-top: 16px; padding: 12px 14px; background: var(--shola-2); border-radius: var(--r-m); }
+.steps-box h4 { margin: 0 0 6px; font-size: 14px; }
+.empty-line { padding: 16px 18px; color: var(--kali-3); font-size: 14.5px; }

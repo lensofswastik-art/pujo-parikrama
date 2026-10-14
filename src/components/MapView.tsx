@@ -51,7 +51,7 @@ const zonesFC: FC = {
 function sheetPadding() {
   const mobile = window.innerWidth < 900;
   const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 200;
-  return mobile ? { top: 110, bottom: snap + 30, left: 36, right: 36 } : { top: 60, bottom: 60, left: 60, right: 60 };
+  return mobile ? { top: 170, bottom: snap + 30, left: 36, right: 36 } : { top: 60, bottom: 60, left: 60, right: 60 };
 }
 
 export default function MapView({ pandals, plan, start, selectedId, showZones, fitKey, onSelect }: Props) {
@@ -195,7 +195,8 @@ export default function MapView({ pandals, plan, start, selectedId, showZones, f
     if (!m) return;
     const pts: [number, number][] = [];
     if (start) pts.push([start.lng, start.lat]);
-    plan?.stops.forEach((s) => pts.push([s.lng, s.lat]));
+    // Frame the start and the nearest handful of pandals.
+    plan?.stops.slice(0, 8).forEach((s) => pts.push([s.lng, s.lat]));
     if (pts.length < 2) return;
     const b = new maplibregl.LngLatBounds(pts[0], pts[0]);
     pts.forEach((p) => b.extend(p));
@@ -206,14 +207,19 @@ export default function MapView({ pandals, plan, start, selectedId, showZones, f
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
 
-  /* Pan to selected pandal */
+  /* Frame the start and the selected pandal */
   useEffect(() => {
     const m = map.current;
     const p = pandals.find((x) => x.id === selectedId);
     if (!m || !p) return;
-    const pad = sheetPadding();
-    m.easeTo({ center: [p.lng, p.lat], zoom: Math.max(m.getZoom(), 15), padding: pad, duration: 600 });
-  }, [selectedId, pandals]);
+    if (start) {
+      const b = new maplibregl.LngLatBounds([start.lng, start.lat], [start.lng, start.lat]).extend([p.lng, p.lat]);
+      m.fitBounds(b, { padding: sheetPadding(), maxZoom: 16, duration: 700 });
+    } else {
+      m.easeTo({ center: [p.lng, p.lat], zoom: Math.max(m.getZoom(), 15), padding: sheetPadding(), duration: 600 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   return <div ref={box} className="map" style={{ position: "absolute", inset: 0 }} />;
 }

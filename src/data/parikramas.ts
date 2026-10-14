@@ -67,34 +67,66 @@ export interface Area {
   bn: string;
   lat: number;
   lng: number;
-  /** Shown as a quick-pick capsule under the search bar */
-  capsule?: boolean;
+  kind: "metro" | "area";
   metro?: { station: string; walkMin: number };
 }
 
-/** Starting areas. Capsules are the common pandal-hopping bases; the rest appear when searching. */
-export const AREAS: Area[] = [
-  { id: "dumdum", label: "Dum Dum", bn: "দমদম", lat: 22.6213, lng: 88.393, capsule: true, metro: { station: "Dum Dum", walkMin: 0 } },
-  { id: "laketown", label: "Lake Town", bn: "লেকটাউন", lat: 22.6035, lng: 88.4015, capsule: true },
-  { id: "saltlake", label: "Salt Lake", bn: "সল্টলেক", lat: 22.585, lng: 88.41, capsule: true, metro: { station: "City Centre (Green)", walkMin: 8 } },
-  { id: "shyambazar", label: "Shyambazar", bn: "শ্যামবাজার", lat: 22.6007, lng: 88.3727, capsule: true, metro: { station: "Shyambazar", walkMin: 2 } },
-  { id: "kumartuli", label: "Kumartuli", bn: "কুমোরটুলি", lat: 22.5995, lng: 88.3635, capsule: true, metro: { station: "Shobhabazar Sutanuti", walkMin: 7 } },
-  { id: "college-st", label: "College Street", bn: "কলেজ স্ট্রিট", lat: 22.5747, lng: 88.3633, capsule: true, metro: { station: "MG Road", walkMin: 9 } },
-  { id: "sealdah", label: "Sealdah", bn: "শিয়ালদহ", lat: 22.5678, lng: 88.3706, capsule: true, metro: { station: "Sealdah (Green)", walkMin: 4 } },
-  { id: "kalighat", label: "Kalighat", bn: "কালীঘাট", lat: 22.5182, lng: 88.3459, capsule: true, metro: { station: "Kalighat", walkMin: 0 } },
-  { id: "gariahat", label: "Gariahat", bn: "গড়িয়াহাট", lat: 22.5181, lng: 88.3667, capsule: true },
-  { id: "behala", label: "Behala", bn: "বেহালা", lat: 22.4975, lng: 88.3165, capsule: true, metro: { station: "Behala Chowrasta (Purple)", walkMin: 2 } },
-  { id: "newtown", label: "New Town", bn: "নিউটাউন", lat: 22.5806, lng: 88.4645, capsule: true },
-  { id: "tala", label: "Tala / Belgachia", bn: "টালা", lat: 22.6061, lng: 88.3807, metro: { station: "Belgachia", walkMin: 1 } },
-  { id: "hatibagan", label: "Hatibagan", bn: "হাতিবাগান", lat: 22.5935, lng: 88.371, metro: { station: "Shyambazar", walkMin: 10 } },
-  { id: "esplanade", label: "Esplanade", bn: "এসপ্ল্যানেড", lat: 22.5646, lng: 88.3517, metro: { station: "Esplanade", walkMin: 0 } },
-  { id: "howrah", label: "Howrah station", bn: "হাওড়া", lat: 22.5839, lng: 88.3424 },
-  { id: "bhowanipore", label: "Bhowanipore", bn: "ভবানীপুর", lat: 22.53, lng: 88.348, metro: { station: "Jatin Das Park", walkMin: 6 } },
-  { id: "kasba", label: "Kasba", bn: "কসবা", lat: 22.515, lng: 88.388 },
-  { id: "new-alipore", label: "New Alipore / Chetla", bn: "নিউ আলিপুর", lat: 22.511, lng: 88.336 },
-  { id: "jadavpur", label: "Jadavpur", bn: "যাদবপুর", lat: 22.4975, lng: 88.3712 },
-  { id: "naktala", label: "Garia / Naktala", bn: "নাকতলা", lat: 22.4728, lng: 88.3655, metro: { station: "Gitanjali", walkMin: 8 } },
+const st = (id: string, label: string, bn: string, lat: number, lng: number, station = label): Area =>
+  ({ id, label, bn, lat, lng, kind: "metro", metro: { station, walkMin: 0 } });
+
+/**
+ * Metro stations — the main way people start a pandal hop. Positions are approximate
+ * station entrances; nudge them in Google Maps if a pin looks off.
+ */
+export const METRO_STATIONS: Area[] = [
+  st("m-dumdum", "Dum Dum", "দমদম", 22.6213, 88.393),
+  st("m-belgachia", "Belgachia", "বেলগাছিয়া", 22.6061, 88.3807),
+  st("m-shyambazar", "Shyambazar", "শ্যামবাজার", 22.6007, 88.3727),
+  st("m-shobhabazar", "Shobhabazar Sutanuti", "শোভাবাজার", 22.5966, 88.3685),
+  st("m-girishpark", "Girish Park", "গিরিশ পার্ক", 22.5868, 88.3623),
+  st("m-mgroad", "MG Road", "এমজি রোড", 22.58, 88.3595),
+  st("m-central", "Central", "সেন্ট্রাল", 22.5732, 88.3561),
+  st("m-sealdah", "Sealdah", "শিয়ালদহ", 22.5678, 88.3706, "Sealdah (Green)"),
+  st("m-esplanade", "Esplanade", "এসপ্ল্যানেড", 22.5646, 88.3517),
+  st("m-parkstreet", "Park Street", "পার্ক স্ট্রিট", 22.5546, 88.3507),
+  st("m-rabindrasadan", "Rabindra Sadan", "রবীন্দ্র সদন", 22.541, 88.3475),
+  st("m-netajibhawan", "Netaji Bhawan", "নেতাজি ভবন", 22.5335, 88.346),
+  st("m-jatindaspark", "Jatin Das Park", "যতীন দাস পার্ক", 22.5265, 88.346),
+  st("m-kalighat", "Kalighat", "কালীঘাট", 22.5182, 88.3459),
+  st("m-rabindrasarobar", "Rabindra Sarobar", "রবীন্দ্র সরোবর", 22.5085, 88.3465),
+  st("m-tollygunge", "Tollygunge", "টালিগঞ্জ", 22.4995, 88.3465, "Mahanayak Uttam Kumar"),
+  st("m-gitanjali", "Gitanjali", "গীতাঞ্জলি", 22.4783, 88.3662),
+  st("m-citycentre", "City Centre", "সিটি সেন্টার", 22.5876, 88.4085, "City Centre (Green)"),
+  st("m-bengalchemical", "Bengal Chemical", "বেঙ্গল কেমিক্যাল", 22.5835, 88.399, "Bengal Chemical (Green)"),
+  st("m-jessoreroad", "Jessore Road", "যশোর রোড", 22.617, 88.405, "Jessore Road (Yellow)"),
+  st("m-behala", "Behala Chowrasta", "বেহালা চৌরাস্তা", 22.4975, 88.3165, "Behala Chowrasta (Purple)"),
+  st("m-sakherbazar", "Sakherbazar", "সখেরবাজার", 22.482, 88.3125, "Sakherbazar (Purple)"),
 ];
+
+const ar = (id: string, label: string, bn: string, lat: number, lng: number): Area => ({ id, label, bn, lat, lng, kind: "area" });
+
+/** Localities, for people starting from home or a para rather than a station. */
+export const LOCALITIES: Area[] = [
+  ar("a-laketown", "Lake Town", "লেকটাউন", 22.6035, 88.4015),
+  ar("a-dumdumpark", "Dum Dum Park", "দমদম পার্ক", 22.6105, 88.411),
+  ar("a-saltlake", "Salt Lake", "সল্টলেক", 22.585, 88.41),
+  ar("a-newtown", "New Town", "নিউটাউন", 22.5806, 88.4645),
+  ar("a-tala", "Tala", "টালা", 22.6065, 88.378),
+  ar("a-kumartuli", "Kumartuli", "কুমোরটুলি", 22.5995, 88.3635),
+  ar("a-hatibagan", "Hatibagan", "হাতিবাগান", 22.5935, 88.371),
+  ar("a-college-st", "College Street", "কলেজ স্ট্রিট", 22.5747, 88.3633),
+  ar("a-bhowanipore", "Bhowanipore", "ভবানীপুর", 22.53, 88.348),
+  ar("a-ballygunge", "Ballygunge", "বালিগঞ্জ", 22.5277, 88.364),
+  ar("a-gariahat", "Gariahat", "গড়িয়াহাট", 22.5181, 88.3667),
+  ar("a-kasba", "Kasba", "কসবা", 22.515, 88.388),
+  ar("a-new-alipore", "New Alipore", "নিউ আলিপুর", 22.511, 88.336),
+  ar("a-jadavpur", "Jadavpur", "যাদবপুর", 22.4975, 88.3712),
+  ar("a-naktala", "Naktala", "নাকতলা", 22.4728, 88.3655),
+  ar("a-behala", "Behala", "বেহালা", 22.4975, 88.3165),
+  ar("a-howrah", "Howrah", "হাওড়া", 22.5839, 88.3424),
+];
+
+export const AREAS: Area[] = [...METRO_STATIONS, ...LOCALITIES];
 
 /** Starting points offered in the "Setting out from" field (besides live location and any pandal). */
 export const PLACES: { label: string; lat: number; lng: number; metro?: { station: string; walkMin: number } }[] = [
