@@ -24,6 +24,10 @@ function addOverlays(m: maplibregl.Map, theme: MapTheme) {
   if (!m.getSource("zones")) m.addSource("zones", { type: "geojson", data: zonesFC });
   m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#C93A33", "fill-opacity": dark ? 0.1 : 0.08 } });
   m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": dark ? "#F2948B" : "#B8282F", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
+  // The chosen starting area: a soft turmeric disc so a tap visibly lands somewhere.
+  if (!m.getSource("start-area")) m.addSource("start-area", { type: "geojson", data: empty });
+  m.addLayer({ id: "start-area-fill", type: "fill", source: "start-area", paint: { "fill-color": "#E0A43A", "fill-opacity": dark ? 0.12 : 0.1 } });
+  m.addLayer({ id: "start-area-line", type: "line", source: "start-area", paint: { "line-color": "#E0A43A", "line-width": 2, "line-opacity": 0.9 } });
   if (!m.getSource("route")) m.addSource("route", { type: "geojson", data: empty });
   m.addLayer({
     id: "route-ride", type: "line", source: "route", filter: ["in", ["get", "mode"], ["literal", ["auto", "bus", "cab"]]],
@@ -55,6 +59,8 @@ interface Props {
   /** Only an explicit tap reframes the map; the default highlight doesn't. */
   focusId?: string | null;
   showZones: boolean;
+  /** Radius of the highlight ring drawn around the chosen start, in metres. */
+  areaRadiusM?: number;
   mapTheme: MapTheme;
   fitKey: string;
   onSelect: (id: string) => void;
@@ -83,13 +89,23 @@ const zonesFC: FC = {
   })),
 };
 
+/**
+ * Padding that keeps the framed area clear of the search bar and the sheet.
+ * Clamped so it never exceeds the canvas — MapLibre silently refuses to move
+ * when padding is larger than the map (e.g. a short phone with the sheet open).
+ */
 function sheetPadding() {
-  const mobile = window.innerWidth < 900;
+  const w = window.innerWidth, h = window.innerHeight;
+  const mobile = w < 900;
   const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 200;
-  return mobile ? { top: 140, bottom: snap + 40, left: 36, right: 36 } : { top: 60, bottom: 60, left: 460, right: 60 };
+  const p = mobile ? { top: 150, bottom: snap + 24, left: 32, right: 32 } : { top: 60, bottom: 60, left: 460, right: 60 };
+  const maxV = Math.max(0, h - 120), maxH = Math.max(0, w - 120);
+  if (p.top + p.bottom > maxV) { const k = maxV / (p.top + p.bottom); p.top *= k; p.bottom *= k; }
+  if (p.left + p.right > maxH) { const k = maxH / (p.left + p.right); p.left *= k; p.right *= k; }
+  return p;
 }
 
-export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, mapTheme, fitKey, onSelect }: Props) {
+export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, areaRadiusM, mapTheme, fitKey, onSelect }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef<Map<string, { m: maplibregl.Marker; el: HTMLDivElement }>>(new Map());
@@ -130,6 +146,17 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
     if (firstTheme.current) { firstTheme.current = false; return; }
     map.current?.setStyle(MAP_STYLES[mapTheme]);
   }, [mapTheme]);
+
+  /* Highlight the chosen starting area */
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    const src = m.getSource("start-area") as maplibregl.GeoJSONSource | undefined;
+    if (!src) return;
+    src.setData(start && areaRadiusM
+      ? { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [circle(start.lng, start.lat, areaRadiusM, 72)] } }] }
+      : empty);
+  }, [start, areaRadiusM, ready, styleTick]);
 
   /* Zones visibility */
   useEffect(() => {
@@ -224,10 +251,17 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
     if (pts.length < 2) return;
     const b = new maplibregl.LngLatBounds(pts[0], pts[0]);
     pts.forEach((p) => b.extend(p));
-    const fit = () => { m.resize(); m.fitBounds(b, { padding: sheetPadding(), maxZoom: 16, duration: 900 }); };
-    const t = setTimeout(fit, 60);
-    if (!m.loaded()) m.once("load", fit);
-    return () => { clearTimeout(t); m.off("load", fit); };
+    const fit = () => {
+      m.resize();
+      const padding = sheetPadding();
+      const cam = m.cameraForBounds(b, { padding, maxZoom: 15.5 });
+      // Fall back to centring on the start if the bounds can't be framed.
+      if (cam?.center) m.flyTo({ ...cam, padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration: 900, essential: true });
+      else if (start) m.flyTo({ center: [start.lng, start.lat], zoom: 14, duration: 900, essential: true });
+    };
+    // Wait a frame for the sheet to settle so the padding is current.
+    const t = setTimeout(fit, 120);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
 

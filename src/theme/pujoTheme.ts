@@ -70,7 +70,8 @@ export const pujoTheme = defineTheme({
         borderStyle: 'solid',
         borderRadius: 'var(--radius-full)',
       },
-      isPressed: {
+      // The pressed state is exposed as a prop value: data-is-pressed="true".
+      'isPressed:true': {
         backgroundColor: 'var(--color-accent)',
         borderColor: 'var(--color-accent)',
         color: 'var(--color-on-accent)',

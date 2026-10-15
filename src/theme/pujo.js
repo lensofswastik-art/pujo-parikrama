@@ -531,7 +531,7 @@ export const pujoTheme = {
         "borderStyle": "solid",
         "borderRadius": "var(--radius-full)"
       },
-      "isPressed": {
+      "isPressed:true": {
         "backgroundColor": "var(--color-accent)",
         "borderColor": "var(--color-accent)",
         "color": "var(--color-on-accent)"

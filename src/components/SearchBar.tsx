@@ -21,10 +21,13 @@ export type Pick =
 type PlaceItem = SearchableItem<{ pick: Pick; sub: string; group: string }>;
 
 interface Props {
+  /** Label of the chosen starting point, shown in the field. */
+  value: string | null;
   activeAreaId: string | null;
   category: "metro" | "area";
   onCategoryChange: (c: "metro" | "area") => void;
   onPick: (p: Pick) => void;
+  onClear: () => void;
 }
 
 const areaItem = (a: Area): PlaceItem => ({
@@ -43,7 +46,7 @@ const ALL_ITEMS: PlaceItem[] = [
 ];
 
 /** One search field + Metro/Area switch, with the matching places as quick picks below. */
-export default function SearchBar({ activeAreaId, category, onCategoryChange, onPick }: Props) {
+export default function SearchBar({ value, activeAreaId, category, onCategoryChange, onPick, onClear }: Props) {
   const source: SearchSource<PlaceItem> = useMemo(() => ({
     bootstrap: () => (category === "metro" ? METRO_STATIONS : LOCALITIES).map(areaItem),
     search: (q: string) => {
@@ -63,10 +66,10 @@ export default function SearchBar({ activeAreaId, category, onCategoryChange, on
             isLabelHidden
             placeholder="Search a station, area or pandal"
             searchSource={source}
-            value={null}
-            hasClear={false}
+            value={value ? { id: activeAreaId ?? "current", label: value } : null}
             onChange={(item) => {
-              const pick = item?.auxiliaryData?.pick;
+              if (!item) { onClear(); return; }
+              const pick = item.auxiliaryData?.pick;
               if (pick) onPick(pick);
             }}
             hasEntriesOnFocus

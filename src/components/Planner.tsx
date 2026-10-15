@@ -97,6 +97,9 @@ function App() {
 
   const beginAt = useCallback((s: Start) => {
     setStart(s);
+    if (s.areaId) setCategory(s.areaId.startsWith("m-") ? "metro" : "area");
+    // Phones: drop the sheet to its peek so the map takes focus as it flies there.
+    if (typeof window !== "undefined" && window.innerWidth < 900) setSnap("peek");
     setSelectedId(null); setView("list"); setShowAll(false);
     setFitTick((t) => t + 1);
   }, []);
@@ -167,7 +170,6 @@ function App() {
   useEffect(() => {
     document.documentElement.style.setProperty("--snap", `${Math.round(drag ?? snapPx(snap))}px`);
   }, [snap, drag, snapPx, vhTick]);
-  useEffect(() => { if (start) setSnap((s) => (s === "peek" ? "half" : s)); }, [start]);
 
   const cycle = () => setSnap((s) => (s === "peek" ? "half" : s === "half" ? "full" : "peek"));
   const onGrabDown = (e: React.PointerEvent) => {
@@ -206,8 +208,9 @@ function App() {
     <VStack className="shell">
       <VStack className="side">
         <VStack as="header" className="top">
-          <SearchBar activeAreaId={start?.areaId ?? null}
-            category={category} onCategoryChange={setCategory} onPick={onPick} />
+          <SearchBar value={start?.label ?? null} activeAreaId={start?.areaId ?? null}
+            category={category} onCategoryChange={setCategory} onPick={onPick}
+            onClear={() => { setStart(null); setSelectedId(null); setView("list"); setSnap("peek"); }} />
         </VStack>
 
         <VStack as="section" aria-label="Pandals near you"
@@ -299,7 +302,7 @@ function App() {
       </VStack>
 
       <VStack className="map-wrap">
-        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} focusId={selectedId} showZones={showZones} mapTheme={mapTheme} fitKey={fitKey} onSelect={onMapSelect} />
+        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} focusId={selectedId} showZones={showZones} areaRadiusM={800} mapTheme={mapTheme} fitKey={fitKey} onSelect={onMapSelect} />
         <VStack gap={2} className="map-tools" hidden={snap === "full"}>
           <DropdownMenu placement="start" alignment="end" menuWidth={220}
             renderTrigger={(props) => (

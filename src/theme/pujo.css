@@ -620,7 +620,7 @@
     border-radius: var(--radius-full);
   }
 
-  .astryx-toggle-button[data-is-pressed="isPressed"] {
+  .astryx-toggle-button[data-is-pressed="true"] {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-on-accent);
