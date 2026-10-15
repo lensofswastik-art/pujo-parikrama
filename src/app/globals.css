@@ -558,3 +558,26 @@ button { cursor: pointer; }
   .search-row .cat { flex-direction: column; border-radius: 16px; }
   .search-row .search-bar { border-radius: 16px; }
 }
+
+/* ── Horizontal Metro/Area toggle, nested radii (outer − padding = inner) ── */
+.search-row { --row-r: 24px; --toggle-pad: 4px; }
+.search-row .search-bar { border-radius: var(--row-r); }
+.search-row .cat {
+  flex-direction: row; display: flex; gap: 0; padding: var(--toggle-pad);
+  border-radius: var(--row-r);
+}
+.search-row .cat button {
+  flex: 1 1 0; min-width: 0; height: 100%; padding: 0 4px; gap: 4px;
+  border-radius: calc(var(--row-r) - var(--toggle-pad));
+  font-size: 13px; white-space: nowrap;
+}
+.search-row .cat button svg { display: none; }
+@media (min-width: 900px) {
+  .search-row { --row-r: 16px; }
+  .search-row .cat { flex-direction: row; border-radius: var(--row-r); }
+  .search-row .search-bar { border-radius: var(--row-r); }
+  .search-row .cat button svg { display: inline; }
+}
+.search-row .cat { align-self: stretch; align-items: stretch; }
+.search-row .cat button { height: auto; }
+@media (min-width: 900px) { .search-row .cat button svg { display: none; } }
