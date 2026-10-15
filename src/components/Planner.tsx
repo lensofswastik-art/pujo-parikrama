@@ -224,7 +224,7 @@ function App() {
             <VStack gap={3} paddingInline={4} paddingBlockStart={1} paddingBlockEnd={4}>
               <VStack gap={1}>
                 <HStack justify="between" align="center" gap={2}>
-                  <Heading level={2} type="bangla">{start ? "কাছের পুজো" : "পুজো পরিক্রমা ২০২৬"}</Heading>
+                  <Heading level={2} type="bangla">{start ? "কাছের পুজো" : "কাছের পুজো ২০২৬"}</Heading>
                   <Text type="supporting" size="xsm" className="maker-tag">
                     Made by <Link href={MAKER_URL} isExternalLink>Swastik</Link>
                   </Text>

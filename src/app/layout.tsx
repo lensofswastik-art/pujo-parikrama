@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "পুজো পরিক্রমা · Kolkata pandal routes 2026",
+  title: "কাছের পুজো ২০২৬ · Kolkata pandal routes",
   description: "Plan Durga Puja 2026 pandal hopping in Kolkata — North, South, Dum Dum, Salt Lake — with routes that work around police no-entry grids.",
 };
 
