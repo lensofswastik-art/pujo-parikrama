@@ -259,7 +259,7 @@ function App() {
             {view === "list" && !start && (
               <List header={<Heading level={3}>This year&apos;s must-sees</Heading>} hasDividers>
                 {mustSees.map((p) => (
-                  <ListItem key={p.id} label={p.name} description={p.locality}
+                  <ListItem key={p.id} label={p.name} description={`${p.theme ?? "Theme yet to be revealed"} · ${p.locality}`}
                     onClick={() => openDetail(p.id)} endContent={<Icon icon="chevronRight" color="secondary" />} />
                 ))}
               </List>
@@ -349,7 +349,7 @@ function PandalRow({ p, n, leg, isSelected, onSelect }: { p: Pandal; n: number; 
   return (
     <ListItem
       label={p.name}
-      description={p.locality}
+      description={p.theme ?? p.locality}
       startContent={<Num n={n} must={p.mustSee} />}
       endContent={
         <VStack gap={0} align="end">
@@ -384,7 +384,7 @@ function RouteCard({ p, leg, n, onDetail }: { p: Pandal; leg: Leg; n: number; on
           <Num n={n} must={p.mustSee} />
           <VStack gap={0}>
             <Heading level={3} maxLines={1}>{p.name}</Heading>
-            <Text type="supporting" maxLines={1}>{p.locality}</Text>
+            <Text type="supporting" maxLines={1}>{p.theme ?? p.locality}</Text>
           </VStack>
         </HStack>
         <HStack gap={2} align="start">
@@ -431,6 +431,13 @@ function Detail({ p, slot, start, leg, onBack }: { p: Pandal; slot: Slot; start:
         <Heading level={2}>{p.name}</Heading>
         <Text type="supporting">{p.locality}{start ? ` · ${fmtDist(dist(start, p))} from ${start.label}` : ""}</Text>
       </VStack>
+      <Card variant="muted" padding={4}>
+        <VStack gap={1}>
+          <Text type="supporting">Theme 2026</Text>
+          <Heading level={3}>{p.theme ?? "Yet to be revealed"}</Heading>
+          {p.themeMeaning && <Text>{p.themeMeaning}</Text>}
+        </VStack>
+      </Card>
       <MetadataList columns="multi">
         <MetadataListItem label="Crowd">{crowdLabel(p.crowd)}</MetadataListItem>
         <MetadataListItem label="Time inside">~{dwellFor(p, slot)} min</MetadataListItem>
