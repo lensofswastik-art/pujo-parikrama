@@ -259,7 +259,7 @@ function App() {
             {view === "list" && !start && (
               <List header={<Heading level={3}>This year&apos;s must-sees</Heading>} hasDividers>
                 {mustSees.map((p) => (
-                  <ListItem key={p.id} label={p.name} description={`${p.theme ?? "Theme yet to be revealed"} · ${p.locality}`}
+                  <ListItem key={p.id} label={p.name} description={`${p.theme ?? "Theme? Jani na bhai 😅"} · ${p.locality}`}
                     onClick={() => openDetail(p.id)} endContent={<Icon icon="chevronRight" color="secondary" />} />
                 ))}
               </List>
@@ -434,7 +434,7 @@ function Detail({ p, slot, start, leg, onBack }: { p: Pandal; slot: Slot; start:
       <Card variant="muted" padding={4}>
         <VStack gap={1}>
           <Text type="supporting">Theme 2026</Text>
-          <Heading level={3}>{p.theme ?? "Yet to be revealed"}</Heading>
+          <Heading level={3}>{p.theme ?? "Jani na bhai, nije giye dekhe nis. Bhule gechi 😅"}</Heading>
           {p.themeMeaning && <Text>{p.themeMeaning}</Text>}
         </VStack>
       </Card>
