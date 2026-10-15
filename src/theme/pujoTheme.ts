@@ -3,15 +3,15 @@ import {neutralTheme} from '@astryxdesign/theme-neutral';
 
 /**
  * Pujo Parikrama theme — "Pujo Night".
- * Marigold (genda) garlands against a black night, built on Astryx Neutral.
+ * Sindoor red (#DC2F02) against a graphite night, built on Astryx Neutral.
  *
- *   marigold  accent: buttons, selection, numbered pins (dark text on it)
+ *   sindoor   accent: buttons, selection, numbered pins (white text on it)
  *   dusk blue secondary: metro routes, start point, must-see rings, focus ring
  *   alert red reserved for police closures and walking routes
  *
  * Every text/surface pair below was measured (WCAG 2.2):
  *   body text ≥ 11.4:1, secondary text ≥ 6.9:1, accent text ≥ 7.3:1 on every dark
- *   surface; dark text on marigold 8–10.9:1 across its gradient; emphasized
+ *   surface; white on sindoor 4.7–6.3:1 across its gradient; emphasized
  *   borders ≥ 3.4:1. Light-mode
  *   values hold ≥ 4.5:1 text and ≥ 3:1 borders the same way.
  * Build after every edit: `npx astryx theme build src/theme/pujoTheme.ts`.
@@ -20,7 +20,7 @@ export const pujoTheme = defineTheme({
   name: 'pujo',
   extends: neutralTheme,
 
-  color: {accent: ['#9A5B00', '#F2A33A'], neutralStyle: 'cool', contrast: 'standard'},
+  color: {accent: ['#DC2F02', '#DC2F02'], neutralStyle: 'cool', contrast: 'standard'},
 
   typography: {
     scale: {base: 15, ratio: 1.2},
@@ -32,12 +32,12 @@ export const pujoTheme = defineTheme({
   motion: {fast: 150, medium: 300, slow: 700, ratio: 0.75},
 
   tokens: {
-    // Accent — marigold. Labels on it are dark ink, not white (8.8:1 vs 2.1:1).
-    '--color-accent': ['#9A5B00', '#F2A33A'],
-    '--color-on-accent': ['#FFFFFF', '#140E05'],
-    '--color-accent-muted': ['rgb(154 91 0 / 0.10)', 'rgb(242 163 58 / 0.12)'],
-    '--color-text-accent': ['#8A5200', '#F5B35A'],
-    '--color-icon-accent': ['#8A5200', '#F5B35A'],
+    // Accent — sindoor red #DC2F02. Labels on it are white (4.7:1, rising to 6.3:1 down its gradient).
+    '--color-accent': ['#DC2F02', '#DC2F02'],
+    '--color-on-accent': ['#FFFFFF', '#FFFFFF'],
+    '--color-accent-muted': ['rgb(220 47 2 / 0.10)', 'rgb(220 47 2 / 0.18)'],
+    '--color-text-accent': ['#B82600', '#FF7A57'],
+    '--color-icon-accent': ['#B82600', '#FF7A57'],
 
     // Surfaces — warm paper by day; by night a near-black page under graphite widgets.
     '--color-background-body': ['#F7F4EE', '#0E0E10'],
@@ -97,15 +97,15 @@ export const pujoTheme = defineTheme({
     '--pujo-radius-segment': '4px',
     '--pujo-control-height': '3.25rem',
     '--pujo-chip-bg': ['#F1ECE3', '#141416'],
-    '--pujo-marigold-top': ['#B36C08', '#F7B85C'],
-    '--pujo-marigold-bottom': ['#8F5400', '#E8952A'],
+    '--pujo-sindoor-top': ['#DC2F02', '#DC2F02'],
+    '--pujo-sindoor-bottom': ['#B82600', '#B82600'],
     '--pujo-graphite-top': ['#FFFFFF', '#3A3A40'],
     '--pujo-graphite-bottom': ['#F3EEE6', '#2A2A2F'],
-    '--pujo-marigold': ['#9A5B00', '#F2A33A'],
+    '--pujo-sindoor': ['#B82600', '#FF7A57'],
     '--pujo-dusk': ['#2F5F8A', '#8FB8D9'],
     // Map pins sit on the basemap, not the panel, so they keep one look:
-    // marigold fill, ink numeral and ink outline (15:1 on the light map).
-    '--pujo-pin': '#F2A33A',
+    // sindoor fill, white numeral and white outline, ink ring when selected.
+    '--pujo-pin': '#DC2F02',
     '--pujo-pin-ink': '#111423',
     '--pujo-pin-must': '#8FB8D9',
     '--pujo-start': '#2F5F8A',
@@ -113,7 +113,7 @@ export const pujoTheme = defineTheme({
 
   components: {
     // Quick-pick capsules — filter chips: set into the panel (darker than it,
-    // hairline border), small 11px label, 8px radius. Selected fills marigold
+    // hairline border), small 11px label, 8px radius. Selected fills sindoor
     // with a soft inner shadow so it reads as pressed in.
     'toggle-button': {
       base: {
@@ -126,8 +126,8 @@ export const pujoTheme = defineTheme({
         boxShadow: 'var(--pujo-bevel-subtle)',
       },
       'isPressed:true': {
-        backgroundImage: 'linear-gradient(180deg, var(--pujo-marigold-top), var(--pujo-marigold-bottom))',
-        borderColor: 'var(--pujo-marigold-bottom)',
+        backgroundImage: 'linear-gradient(180deg, var(--pujo-sindoor-top), var(--pujo-sindoor-bottom))',
+        borderColor: 'var(--pujo-sindoor-bottom)',
         color: 'var(--color-on-accent)',
         boxShadow: 'var(--pujo-inset-selected)',
       },
@@ -137,8 +137,8 @@ export const pujoTheme = defineTheme({
     button: {
       base: {borderRadius: 'var(--radius-element)'},
       'variant:primary': {
-        backgroundImage: 'linear-gradient(180deg, var(--pujo-marigold-top), var(--pujo-marigold-bottom))',
-        borderColor: 'var(--pujo-marigold-bottom)',
+        backgroundImage: 'linear-gradient(180deg, var(--pujo-sindoor-top), var(--pujo-sindoor-bottom))',
+        borderColor: 'var(--pujo-sindoor-bottom)',
         borderWidth: 'var(--border-width)',
         borderStyle: 'solid',
         boxShadow: 'var(--pujo-bevel), var(--shadow-low)',
@@ -166,13 +166,13 @@ export const pujoTheme = defineTheme({
     },
     'segmented-control-item': {
       selected: {
-        backgroundImage: 'linear-gradient(180deg, var(--pujo-marigold-top), var(--pujo-marigold-bottom))',
+        backgroundImage: 'linear-gradient(180deg, var(--pujo-sindoor-top), var(--pujo-sindoor-bottom))',
         color: 'var(--color-on-accent)',
         boxShadow: 'var(--pujo-inset-selected)',
       },
     },
     // Closure banners speak in the alert red, not the default yellow, so they
-    // never read as the marigold accent.
+    // read as alerts.
     banner: {
       'status:warning': {
         '--color-text-yellow': 'var(--color-warning)',
@@ -188,7 +188,7 @@ export const pujoTheme = defineTheme({
         fontSize: 'var(--font-size-xl)',
         lineHeight: '1.3',
         fontWeight: 'var(--font-weight-semibold)',
-        color: 'var(--pujo-marigold)',
+        color: 'var(--pujo-sindoor)',
       },
     },
   },
