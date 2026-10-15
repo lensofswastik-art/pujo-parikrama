@@ -543,3 +543,18 @@ button { cursor: pointer; }
 .side .row.open .stop-num { box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px var(--sindoor); }
 .side .stop-num.must,
 .side .row.open .stop-num.must { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--holud); }
+
+/* ── Search (70%) + Metro/Area toggle (30%) on one row ── */
+.search-row { display: flex; gap: 8px; align-items: stretch; }
+.search-row .search-bar { flex: 7 1 0; min-width: 0; }
+.search-row .cat {
+  flex: 3 1 0; min-width: 0; width: auto; display: flex; flex-direction: column; gap: 3px; padding: 4px;
+  border-radius: 20px;
+}
+.search-row .cat button { flex: 1; padding: 0 6px; gap: 4px; font-size: 13px; min-height: 0; }
+.search-row .cat button svg { flex: none; }
+.picker { padding-top: 8px; }
+@media (min-width: 900px) {
+  .search-row .cat { flex-direction: column; border-radius: 16px; }
+  .search-row .search-bar { border-radius: 16px; }
+}

@@ -53,7 +53,7 @@ const zonesFC: FC = {
 function sheetPadding() {
   const mobile = window.innerWidth < 900;
   const snap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--snap")) || 200;
-  return mobile ? { top: 190, bottom: snap + 40, left: 36, right: 36 } : { top: 60, bottom: 60, left: 460, right: 60 };
+  return mobile ? { top: 140, bottom: snap + 40, left: 36, right: 36 } : { top: 60, bottom: 60, left: 460, right: 60 };
 }
 
 export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, fitKey, onSelect }: Props) {

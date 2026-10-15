@@ -58,6 +58,7 @@ export default function SearchBar({ value, activeAreaId, onPick, onClear }: Prop
 
   return (
     <div className="search" ref={root}>
+      <div className="search-row">
       <div className="search-bar">
         <span className="search-mark"><Alpona size={26} /></span>
         <input
@@ -84,6 +85,11 @@ export default function SearchBar({ value, activeAreaId, onPick, onClear }: Prop
           <button className="search-btn" onClick={() => choose({ kind: "here" })} aria-label="Use my current location"><ILocate width={19} /></button>
         )}
       </div>
+      <div className="cat" role="tablist" aria-label="Start from">
+        <button role="tab" aria-selected={cat === "metro"} aria-label="Metro stations" onClick={() => { setCat("metro"); setFocused(false); }}><IMetro width={15} /><span>Metro</span></button>
+        <button role="tab" aria-selected={cat === "area"} aria-label="Areas" onClick={() => { setCat("area"); setFocused(false); }}><span>Area</span></button>
+      </div>
+      </div>
 
       {focused ? (
         <ul className="search-results" id="search-results" role="listbox">
@@ -101,10 +107,6 @@ export default function SearchBar({ value, activeAreaId, onPick, onClear }: Prop
         </ul>
       ) : (
         <div className="picker">
-          <div className="cat" role="tablist" aria-label="Start from">
-            <button role="tab" aria-selected={cat === "metro"} onClick={() => setCat("metro")}><IMetro width={15} />Metro</button>
-            <button role="tab" aria-selected={cat === "area"} onClick={() => setCat("area")}>Area</button>
-          </div>
           <div className="capsules" role="group" aria-label={cat === "metro" ? "Metro stations" : "Areas"}>
             {list.map((a) => (
               <button key={a.id} className="capsule" aria-pressed={activeAreaId === a.id} onClick={() => choose({ kind: "area", area: a })}>
