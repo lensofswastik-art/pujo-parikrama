@@ -190,3 +190,8 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
 }
 .capsules .astryx-toggle-button,
 .capsules button, .capsules button * { font-size: var(--pujo-chip-font); line-height: 1.2; }
+
+/* "Made by" credit beside the sheet title. */
+.maker-tag { flex: none; white-space: nowrap; }
+.maker-tag .astryx-link, .maker-tag a, .maker-tag a * { font-size: inherit; line-height: inherit; }
+.maker-tag a { color: var(--color-text-accent); font-weight: var(--font-weight-semibold); }

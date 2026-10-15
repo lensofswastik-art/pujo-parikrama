@@ -39,6 +39,7 @@ type Start = Pt & { label: string; areaId: string | null; metro?: { station: str
 type View = "list" | "detail" | "roads";
 
 /** "Near you" radius, how far a must-see may be, and list sizes. */
+const MAKER_URL = "https://www.linkedin.com/in/swastik-bose007";
 const NEARBY_M = 3000;
 const ATTRACTION_M = 8000;
 const MAX_NEARBY = 40;
@@ -222,7 +223,12 @@ function App() {
             </Center>
             <VStack gap={3} paddingInline={4} paddingBlockStart={1} paddingBlockEnd={4}>
               <VStack gap={1}>
-                <Heading level={2} type="bangla">{start ? "কাছের পুজো" : "পুজো পরিক্রমা ২০২৬"}</Heading>
+                <HStack justify="between" align="center" gap={2}>
+                  <Heading level={2} type="bangla">{start ? "কাছের পুজো" : "পুজো পরিক্রমা ২০২৬"}</Heading>
+                  <Text type="supporting" size="xsm" className="maker-tag">
+                    Made by <Link href={MAKER_URL} isExternalLink>Swastik</Link>
+                  </Text>
+                </HStack>
                 <Text type="supporting" aria-live="polite">
                   {start
                     ? `${nearby.length} pandals within ${radius / 1000} km of ${start.label}`
