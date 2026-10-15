@@ -581,3 +581,20 @@ button { cursor: pointer; }
 .search-row .cat { align-self: stretch; align-items: stretch; }
 .search-row .cat button { height: auto; }
 @media (min-width: 900px) { .search-row .cat button svg { display: none; } }
+
+/* Mobile: give the toggle room to breathe */
+@media (max-width: 899px) {
+  .search-row .search-bar { flex: 1 1 auto; gap: 8px; padding-left: 6px; }
+  .search-row .search-mark { width: 32px; height: 32px; }
+  .search-row .search-input { font-size: 15.5px; }
+  .search-row .cat { flex: 0 0 148px; --toggle-pad: 5px; }
+  .search-row .cat button { padding: 0 12px; font-size: 14px; }
+}
+
+/* Mobile: capsules run edge to edge instead of being cut at the panel gutter */
+@media (max-width: 899px) {
+  .picker .capsules {
+    margin: 0 -12px; padding: 2px 12px 8px; scroll-padding-inline: 12px;
+  }
+  .picker .capsules::after { content: ""; flex: 0 0 4px; }
+}
