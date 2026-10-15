@@ -9,10 +9,42 @@ import { bn, type Plan, type Pt } from "@/lib/planner";
 import { legGeometry } from "@/lib/geometry";
 
 /**
- * Free, keyless vector basemap from OpenFreeMap (OpenStreetMap data).
- * Swap MAP_STYLE for "https://tiles.openfreemap.org/styles/bright" or "/positron" to change the look.
+ * Free, keyless vector basemaps from OpenFreeMap (OpenStreetMap data).
+ * Other styles: /styles/bright, /styles/positron, /styles/fiord.
  */
-const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+export type MapTheme = "light" | "dark";
+const MAP_STYLES: Record<MapTheme, string> = {
+  light: "https://tiles.openfreemap.org/styles/liberty",
+  dark: "https://tiles.openfreemap.org/styles/dark",
+};
+
+/** Route + zone overlays, re-added whenever the base style changes. */
+function addOverlays(m: maplibregl.Map, theme: MapTheme) {
+  const dark = theme === "dark";
+  if (!m.getSource("zones")) m.addSource("zones", { type: "geojson", data: zonesFC });
+  m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#C93A33", "fill-opacity": dark ? 0.1 : 0.08 } });
+  m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": dark ? "#F2948B" : "#B8282F", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
+  if (!m.getSource("route")) m.addSource("route", { type: "geojson", data: empty });
+  m.addLayer({
+    id: "route-ride", type: "line", source: "route", filter: ["in", ["get", "mode"], ["literal", ["auto", "bus", "cab"]]],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": dark ? "#D9D2C6" : "#3D4743", "line-width": 4.5, "line-opacity": 0.85 },
+  });
+  m.addLayer({
+    id: "route-metro", type: "line", source: "route", filter: ["==", ["get", "mode"], "metro"],
+    paint: { "line-color": dark ? "#8FCFBD" : "#24524A", "line-width": 4, "line-dasharray": [2, 1.5] },
+  });
+  m.addLayer({
+    id: "route-walk-halo", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": dark ? "#0E1513" : "#FFFFFF", "line-width": 9, "line-opacity": 0.85 },
+  });
+  m.addLayer({
+    id: "route-walk", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": dark ? "#F06A60" : "#B8282F", "line-width": 5, "line-dasharray": [0, 2] },
+  });
+}
 const KOLKATA: [number, number] = [88.37, 22.565];
 
 interface Props {
@@ -23,6 +55,7 @@ interface Props {
   /** Only an explicit tap reframes the map; the default highlight doesn't. */
   focusId?: string | null;
   showZones: boolean;
+  mapTheme: MapTheme;
   fitKey: string;
   onSelect: (id: string) => void;
 }
@@ -56,12 +89,16 @@ function sheetPadding() {
   return mobile ? { top: 140, bottom: snap + 40, left: 36, right: 36 } : { top: 60, bottom: 60, left: 460, right: 60 };
 }
 
-export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, fitKey, onSelect }: Props) {
+export default function MapView({ pandals, plan, start, selectedId, focusId, showZones, mapTheme, fitKey, onSelect }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef<Map<string, { m: maplibregl.Marker; el: HTMLDivElement }>>(new Map());
   const startMarker = useRef<maplibregl.Marker | null>(null);
   const [ready, setReady] = useState(false);
+  /** Bumps on every base-style load so overlays and data get re-applied. */
+  const [styleTick, setStyleTick] = useState(0);
+  const themeRef = useRef(mapTheme);
+  themeRef.current = mapTheme;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
@@ -70,7 +107,7 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
     if (!box.current) return;
     const m = new maplibregl.Map({
       container: box.current,
-      style: MAP_STYLE,
+      style: MAP_STYLES[mapTheme],
       center: KOLKATA,
       zoom: 11.6,
       attributionControl: { compact: true },
@@ -78,36 +115,21 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
       pitchWithRotate: false,
     });
     m.touchZoomRotate.disableRotation();
-    m.on("load", () => {
-      m.addSource("zones", { type: "geojson", data: zonesFC });
-      m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#b5172b", "fill-opacity": 0.08 } });
-      m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": "#b5172b", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
-
-      m.addSource("route", { type: "geojson", data: empty });
-      m.addLayer({
-        id: "route-ride", type: "line", source: "route", filter: ["in", ["get", "mode"], ["literal", ["auto", "bus", "cab"]]],
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#4a3f38", "line-width": 4.5, "line-opacity": 0.85 },
-      });
-      m.addLayer({
-        id: "route-metro", type: "line", source: "route", filter: ["==", ["get", "mode"], "metro"],
-        paint: { "line-color": "#2f7d5b", "line-width": 4, "line-dasharray": [2, 1.5] },
-      });
-      m.addLayer({
-        id: "route-walk-halo", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#fffdf8", "line-width": 9, "line-opacity": 0.85 },
-      });
-      m.addLayer({
-        id: "route-walk", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#d0121b", "line-width": 5, "line-dasharray": [0, 2] },
-      });
+    m.on("style.load", () => {
+      addOverlays(m, themeRef.current);
       setReady(true);
+      setStyleTick((t) => t + 1);
     });
     map.current = m;
     return () => { m.remove(); map.current = null; };
   }, []);
+
+  /* Switch base map between light and dark */
+  const firstTheme = useRef(true);
+  useEffect(() => {
+    if (firstTheme.current) { firstTheme.current = false; return; }
+    map.current?.setStyle(MAP_STYLES[mapTheme]);
+  }, [mapTheme]);
 
   /* Zones visibility */
   useEffect(() => {
@@ -116,7 +138,7 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
     const v = showZones ? "visible" : "none";
     m.setLayoutProperty("zones-fill", "visibility", v);
     m.setLayoutProperty("zones-line", "visibility", v);
-  }, [showZones, ready]);
+  }, [showZones, ready, styleTick]);
 
   /* Pandal markers: create once, restyle on plan / selection change */
   useEffect(() => {
@@ -189,7 +211,7 @@ export default function MapView({ pandals, plan, start, selectedId, focusId, sho
       });
     });
     return () => ctrl.abort();
-  }, [plan, ready]);
+  }, [plan, ready, styleTick]);
 
   /* Fit to route */
   useEffect(() => {

@@ -20,12 +20,21 @@ npm run dev        # http://localhost:3000
 | Ready parikramas, start points, police advisories, no-vehicle zones | `src/data/parikramas.ts` |
 | Route optimiser (nearest-neighbour + 2-opt), time-budget fitting, per-leg mode logic, ride deep links | `src/lib/planner.ts` |
 | Street geometry for the map (OSRM, foot/car) | `src/lib/geometry.ts` |
-| UI | `src/components/*` |
+| UI (Astryx components) | `src/components/*` |
+| Design system theme (Astryx `defineTheme`) | `src/theme/pujoTheme.ts` → built `pujo.css` / `pujo.js` |
 
 - **Start** — one search bar with Metro / Area capsules (`METRO_STATIONS`, `LOCALITIES` in `parikramas.ts`). Picking one lists pandals within ~3 km walking distance, nearest first, plus must-sees up to ~8 km (`NEARBY_M` / `ATTRACTION_M` in `Planner.tsx`).
 - **Nearest, not a loop** — each pandal is routed directly from your starting point; tapping a row draws that one route and shows how to get there (walk, metro, auto, bus or cab) with Uber, Ola and Rapido buttons.
 - **Evening restrictions** — read from the clock: after 3 pm the no-vehicle bubbles apply, so cab/auto/bus suggestions end at the pandal's `vehicleDrop` road and add the walk.
 - **Rides** — Uber and Ola links pre-fill pickup + drop. Rapido has no public web deep link, so it opens the app/site. "Live directions" opens Google Maps for live traffic.
+
+## Design system
+
+The UI is built on [Astryx](https://astryx.atmeta.com) (Meta's open-source design system, `@astryxdesign/core` 0.7, public beta). Rules for agents and contributors are in `AGENTS.md`.
+
+- Theme: `src/theme/pujoTheme.ts` extends Astryx Neutral — sindoor accent, green-charcoal dark surfaces, soft shadows, concentric radii (32 → 16 → pill), Instrument Sans + Noto Sans Bengali. After editing run `npx astryx theme build src/theme/pujoTheme.ts`.
+- `globals.css` only positions the app frame and map markers, using Astryx tokens.
+- Map settings (gear button) switch the basemap between OpenFreeMap Liberty (light) and Dark; the choice is remembered per browser.
 
 ## Before go-live — please verify
 

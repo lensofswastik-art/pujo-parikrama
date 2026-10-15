@@ -1,121 +1,104 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
+import { HStack } from "@astryxdesign/core/HStack";
+import { VStack } from "@astryxdesign/core/VStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { ToggleButton } from "@astryxdesign/core/ToggleButton";
+import { Typeahead, TypeaheadItem } from "@astryxdesign/core/Typeahead";
+import type { SearchableItem, SearchSource } from "@astryxdesign/core/Typeahead";
 import { AREAS, LOCALITIES, METRO_STATIONS, type Area } from "@/data/parikramas";
 import { PANDALS } from "@/data/pandals";
-import { Alpona, IClose, ILocate, IMetro } from "./Icons";
+import { ILocate } from "./Icons";
 
 export type Pick =
   | { kind: "area"; area: Area }
   | { kind: "pandal"; id: string }
   | { kind: "here" };
 
+type PlaceItem = SearchableItem<{ pick: Pick; sub: string; group: string }>;
+
 interface Props {
-  value: string | null;
   activeAreaId: string | null;
+  category: "metro" | "area";
+  onCategoryChange: (c: "metro" | "area") => void;
   onPick: (p: Pick) => void;
-  onClear: () => void;
 }
 
-/** One input: type a station, area or pandal — or tap a capsule. */
-export default function SearchBar({ value, activeAreaId, onPick, onClear }: Props) {
-  const [q, setQ] = useState("");
-  const [focused, setFocused] = useState(false);
-  const [active, setActive] = useState(0);
-  const [cat, setCat] = useState<"metro" | "area">("metro");
-  const root = useRef<HTMLDivElement>(null);
-  const input = useRef<HTMLInputElement>(null);
+const areaItem = (a: Area): PlaceItem => ({
+  id: a.id,
+  label: a.label,
+  auxiliaryData: { pick: { kind: "area", area: a }, sub: a.bn, group: a.kind === "metro" ? "Metro stations" : "Areas" },
+});
 
-  useEffect(() => {
-    const a = AREAS.find((x) => x.id === activeAreaId);
-    if (a) setCat(a.kind);
-  }, [activeAreaId]);
+const ALL_ITEMS: PlaceItem[] = [
+  ...AREAS.map(areaItem),
+  ...PANDALS.map((p) => ({
+    id: `p:${p.id}`,
+    label: p.name,
+    auxiliaryData: { pick: { kind: "pandal", id: p.id } as Pick, sub: p.locality, group: "Pandals" },
+  })),
+];
 
-  const results = useMemo(() => {
-    const t = q.trim().toLowerCase();
-    const match = (a: Area) => !t || `${a.label} ${a.bn}`.toLowerCase().includes(t);
-    const areas = [...METRO_STATIONS.filter(match), ...LOCALITIES.filter(match)]
-      .map((a) => ({ key: a.id, label: a.label, sub: a.kind === "metro" ? "Metro station" : "Area", bn: a.bn, metro: a.kind === "metro", pick: { kind: "area", area: a } as Pick }));
-    const pandals = t
-      ? PANDALS.filter((p) => `${p.name} ${p.nameBn} ${p.locality} ${p.theme ?? ""}`.toLowerCase().includes(t))
-          .map((p) => ({ key: `p:${p.id}`, label: p.name, sub: p.locality, bn: p.nameBn, metro: false, pick: { kind: "pandal", id: p.id } as Pick }))
-      : [];
-    return [
-      { key: "here", label: "Use my current location", sub: "", bn: "", metro: false, pick: { kind: "here" } as Pick },
-      ...(t ? [...areas, ...pandals] : areas.filter((a) => a.metro === (cat === "metro"))),
-    ].slice(0, 40);
-  }, [q, cat]);
+/** One search field + Metro/Area switch, with the matching places as quick picks below. */
+export default function SearchBar({ activeAreaId, category, onCategoryChange, onPick }: Props) {
+  const source: SearchSource<PlaceItem> = useMemo(() => ({
+    bootstrap: () => (category === "metro" ? METRO_STATIONS : LOCALITIES).map(areaItem),
+    search: (q: string) => {
+      const t = q.trim().toLowerCase();
+      return ALL_ITEMS.filter((i) => `${i.label} ${i.auxiliaryData?.sub ?? ""}`.toLowerCase().includes(t)).slice(0, 12);
+    },
+  }), [category]);
 
-  useEffect(() => {
-    if (!focused) return;
-    const close = (e: PointerEvent) => { if (!root.current?.contains(e.target as Node)) setFocused(false); };
-    document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
-  }, [focused]);
-
-  const choose = (p: Pick) => { onPick(p); setQ(""); setFocused(false); input.current?.blur(); };
-  const list = cat === "metro" ? METRO_STATIONS : LOCALITIES;
+  const quickPicks = category === "metro" ? METRO_STATIONS : LOCALITIES;
 
   return (
-    <div className="search" ref={root}>
-      <div className="search-row">
-      <div className="search-bar">
-        <span className="search-mark"><Alpona size={26} /></span>
-        <input
-          ref={input}
-          className="search-input"
-          value={focused ? q : value ?? ""}
-          placeholder="Nearest metro or your area"
-          aria-label="Search a metro station, area or pandal"
-          role="combobox"
-          aria-expanded={focused}
-          aria-controls="search-results"
-          onFocus={() => { setFocused(true); setQ(""); setActive(0); }}
-          onChange={(e) => { setQ(e.target.value); setActive(0); }}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => Math.min(a + 1, results.length - 1)); }
-            if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(a - 1, 0)); }
-            if (e.key === "Enter" && results[active]) choose(results[active].pick);
-            if (e.key === "Escape") { setFocused(false); input.current?.blur(); }
-          }}
-        />
-        {value && !focused ? (
-          <button className="search-btn" onClick={onClear} aria-label="Clear starting point"><IClose width={18} /></button>
-        ) : (
-          <button className="search-btn" onClick={() => choose({ kind: "here" })} aria-label="Use my current location"><ILocate width={19} /></button>
-        )}
-      </div>
-      <div className="cat" role="tablist" aria-label="Start from">
-        <button role="tab" aria-selected={cat === "metro"} aria-label="Metro stations" onClick={() => { setCat("metro"); setFocused(false); }}><IMetro width={15} /><span>Metro</span></button>
-        <button role="tab" aria-selected={cat === "area"} aria-label="Areas" onClick={() => { setCat("area"); setFocused(false); }}><span>Area</span></button>
-      </div>
-      </div>
+    <VStack gap={2}>
+      <HStack gap={2} align="center" className="search-row">
+        <HStack className="search-field" align="center" gap={1}>
+          <Typeahead<PlaceItem>
+            label="Starting point"
+            isLabelHidden
+            placeholder="Search a station, area or pandal"
+            searchSource={source}
+            value={null}
+            hasClear={false}
+            onChange={(item) => {
+              const pick = item?.auxiliaryData?.pick;
+              if (pick) onPick(pick);
+            }}
+            hasEntriesOnFocus
+            debounceMs={0}
+            size="lg"
+            width="100%"
+            controlClassName="search-control"
+            startIcon={<Icon icon="search" />}
+            emptySearchText="No station, area or pandal matches that."
+            renderItem={(item) => (
+              <TypeaheadItem item={item} description={item.auxiliaryData?.sub} group={item.auxiliaryData?.group} />
+            )}
+          />
+          <IconButton label="Use my current location" variant="ghost" size="lg"
+            icon={<Icon icon={ILocate} />} onClick={() => onPick({ kind: "here" })} />
+        </HStack>
+        <HStack className="search-toggle">
+          <SegmentedControl label="Start from" value={category} layout="fill" size="lg"
+            onChange={(v) => onCategoryChange(v as "metro" | "area")}>
+            <SegmentedControlItem value="metro" label="Metro" />
+            <SegmentedControlItem value="area" label="Area" />
+          </SegmentedControl>
+        </HStack>
+      </HStack>
 
-      {focused ? (
-        <ul className="search-results" id="search-results" role="listbox">
-          {results.map((r, i) => (
-            <li key={r.key}>
-              <button role="option" aria-selected={i === active} data-active={i === active} className="sr-opt"
-                onMouseEnter={() => setActive(i)} onClick={() => choose(r.pick)}>
-                {r.key === "here" ? <ILocate width={17} /> : r.metro ? <IMetro width={17} /> : <span className={`sr-dot ${r.sub === "Area" ? "area" : ""}`} />}
-                <span className="sr-text">{r.label}{r.sub && <small>{r.sub}</small>}</span>
-                {r.bn && <span className="sr-bn">{r.bn}</span>}
-              </button>
-            </li>
-          ))}
-          {results.length === 1 && <li className="sr-empty">No station, area or pandal matches “{q}”.</li>}
-        </ul>
-      ) : (
-        <div className="picker">
-          <div className="capsules" role="group" aria-label={cat === "metro" ? "Metro stations" : "Areas"}>
-            {list.map((a) => (
-              <button key={a.id} className="capsule" aria-pressed={activeAreaId === a.id} onClick={() => choose({ kind: "area", area: a })}>
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      <HStack gap={1.5} className="capsules" role="group" aria-label={category === "metro" ? "Metro stations" : "Areas"}>
+        {quickPicks.map((a) => (
+          <ToggleButton key={a.id} label={a.label} size="sm"
+            isPressed={activeAreaId === a.id}
+            onPressedChange={() => onPick({ kind: "area", area: a })} />
+        ))}
+      </HStack>
+    </VStack>
   );
 }
