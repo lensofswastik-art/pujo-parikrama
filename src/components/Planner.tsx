@@ -220,7 +220,7 @@ function App() {
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") cycle(); }}>
               <Center className="grab-bar">{null}</Center>
             </Center>
-            <VStack gap={3} paddingInline={5} paddingBlockStart={1} paddingBlockEnd={4}>
+            <VStack gap={3} paddingInline={4} paddingBlockStart={1} paddingBlockEnd={4}>
               <VStack gap={1}>
                 <Heading level={2} type="bangla">{start ? "কাছের পুজো" : "পুজো পরিক্রমা ২০২৬"}</Heading>
                 <Text type="supporting" aria-live="polite">
@@ -243,7 +243,7 @@ function App() {
             <Divider />
           </VStack>
 
-          <VStack ref={bodyRef} isScrollable className="sheet-body" gap={5} paddingBlock={4} paddingInline={4}>
+          <VStack ref={bodyRef} isScrollable className="sheet-body" gap={6} paddingBlock={5} paddingInline={4}>
             {view === "roads" && <Roads onBack={() => setView("list")} />}
 
             {view === "detail" && selectedId && (
@@ -302,7 +302,7 @@ function App() {
       </VStack>
 
       <VStack className="map-wrap">
-        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} focusId={selectedId} showZones={showZones} areaRadiusM={800} mapTheme={mapTheme} fitKey={fitKey} onSelect={onMapSelect} />
+        <MapView pandals={PANDALS} plan={mapPlan} start={start} selectedId={activeId} focusId={selectedId} showZones={showZones} areaRadiusM={600} mapTheme={mapTheme} fitKey={fitKey} onSelect={onMapSelect} />
         <VStack gap={2} className="map-tools" hidden={snap === "full"}>
           <DropdownMenu placement="start" alignment="end" menuWidth={220}
             renderTrigger={(props) => (
@@ -373,7 +373,7 @@ function RouteCard({ p, leg, n, onDetail }: { p: Pandal; leg: Leg; n: number; on
   const ModeIcon = MODE_ICON[leg.mode];
   return (
     <Card variant="muted" padding={4}>
-      <VStack gap={3}>
+      <VStack gap={4}>
         <HStack gap={3} align="center">
           <Num n={n} must={p.mustSee} />
           <VStack gap={0}>

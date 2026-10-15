@@ -22,31 +22,31 @@ const MAP_STYLES: Record<MapTheme, string> = {
 function addOverlays(m: maplibregl.Map, theme: MapTheme) {
   const dark = theme === "dark";
   if (!m.getSource("zones")) m.addSource("zones", { type: "geojson", data: zonesFC });
-  m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#C93A33", "fill-opacity": dark ? 0.1 : 0.08 } });
-  m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": dark ? "#F2948B" : "#B8282F", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
-  // The chosen starting area: a soft turmeric disc so a tap visibly lands somewhere.
+  m.addLayer({ id: "zones-fill", type: "fill", source: "zones", paint: { "fill-color": "#E5484D", "fill-opacity": dark ? 0.1 : 0.07 } });
+  m.addLayer({ id: "zones-line", type: "line", source: "zones", paint: { "line-color": dark ? "#FF8A7A" : "#C2272D", "line-width": 1.4, "line-dasharray": [3, 3], "line-opacity": 0.7 } });
+  // The chosen starting area: a soft dusk-blue disc so a tap visibly lands somewhere.
   if (!m.getSource("start-area")) m.addSource("start-area", { type: "geojson", data: empty });
-  m.addLayer({ id: "start-area-fill", type: "fill", source: "start-area", paint: { "fill-color": "#E0A43A", "fill-opacity": dark ? 0.12 : 0.1 } });
-  m.addLayer({ id: "start-area-line", type: "line", source: "start-area", paint: { "line-color": "#E0A43A", "line-width": 2, "line-opacity": 0.9 } });
+  m.addLayer({ id: "start-area-fill", type: "fill", source: "start-area", paint: { "fill-color": dark ? "#8FB8D9" : "#2F5F8A", "fill-opacity": dark ? 0.08 : 0.05 } });
+  m.addLayer({ id: "start-area-line", type: "line", source: "start-area", paint: { "line-color": dark ? "#8FB8D9" : "#2F5F8A", "line-width": 2, "line-opacity": 0.9 } });
   if (!m.getSource("route")) m.addSource("route", { type: "geojson", data: empty });
   m.addLayer({
     id: "route-ride", type: "line", source: "route", filter: ["in", ["get", "mode"], ["literal", ["auto", "bus", "cab"]]],
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": dark ? "#D9D2C6" : "#3D4743", "line-width": 4.5, "line-opacity": 0.85 },
+    paint: { "line-color": dark ? "#D8D3E4" : "#2A2F48", "line-width": 4.5, "line-opacity": 0.85 },
   });
   m.addLayer({
     id: "route-metro", type: "line", source: "route", filter: ["==", ["get", "mode"], "metro"],
-    paint: { "line-color": dark ? "#8FCFBD" : "#24524A", "line-width": 4, "line-dasharray": [2, 1.5] },
+    paint: { "line-color": dark ? "#8FB8D9" : "#2F5F8A", "line-width": 4, "line-dasharray": [2, 1.5] },
   });
   m.addLayer({
     id: "route-walk-halo", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": dark ? "#0E1513" : "#FFFFFF", "line-width": 9, "line-opacity": 0.85 },
+    paint: { "line-color": dark ? "#0A0A0B" : "#FFFFFF", "line-width": 9, "line-opacity": 0.85 },
   });
   m.addLayer({
     id: "route-walk", type: "line", source: "route", filter: ["==", ["get", "mode"], "walk"],
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": dark ? "#F06A60" : "#B8282F", "line-width": 5, "line-dasharray": [0, 2] },
+    paint: { "line-color": dark ? "#FF6B6B" : "#C2272D", "line-width": 5, "line-dasharray": [0, 2] },
   });
 }
 const KOLKATA: [number, number] = [88.37, 22.565];

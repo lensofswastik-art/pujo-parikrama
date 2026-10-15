@@ -32,7 +32,7 @@ npm run dev        # http://localhost:3000
 
 The UI is built on [Astryx](https://astryx.atmeta.com) (Meta's open-source design system, `@astryxdesign/core` 0.7, public beta). Rules for agents and contributors are in `AGENTS.md`.
 
-- Theme: `src/theme/pujoTheme.ts` extends Astryx Neutral — sindoor accent, green-charcoal dark surfaces, soft shadows, concentric radii (32 → 16 → pill), Instrument Sans + Noto Sans Bengali. After editing run `npx astryx theme build src/theme/pujoTheme.ts`.
+- Theme "Pujo Night": `src/theme/pujoTheme.ts` extends Astryx Neutral — marigold accent with ink labels, near-black surfaces, dusk-blue secondary and focus ring, alert red only for closures and walking routes; every text/surface pair measured against WCAG AA (body text ≥ 13:1, secondary ≥ 7.2:1). Soft shadows, concentric radii (32 → 16 → pill), Instrument Sans + Noto Sans Bengali. After editing run `npx astryx theme build src/theme/pujoTheme.ts`.
 - `globals.css` only positions the app frame and map markers, using Astryx tokens.
 - Map settings (gear button) switch the basemap between OpenFreeMap Liberty (light) and Dark; the choice is remembered per browser.
 

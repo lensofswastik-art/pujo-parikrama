@@ -99,40 +99,40 @@ export const pujoTheme = {
     "--color-syntax-property": "light-dark(#005348, #90d7c8)",
     "--color-syntax-punctuation": "light-dark(#6a6a6a, #9e9e9e)",
     "--color-syntax-background": "light-dark(#ffffff, #111111)",
-    "--color-background-surface": "light-dark(#FFFFFF, #131C1A)",
-    "--color-background-body": "light-dark(#F6F3EE, #0E1513)",
-    "--color-background-card": "light-dark(#FBF9F6, #1A2421)",
-    "--color-background-popover": "light-dark(#FFFFFF, #1F2A27)",
-    "--color-background-muted": "light-dark(#2518170D, #25191680)",
-    "--color-accent": "light-dark(#B8282F, #C93A33)",
-    "--color-accent-muted": "light-dark(color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 25%, transparent))",
-    "--color-neutral": "light-dark(#2518171A, #F1DEDB33)",
-    "--color-overlay": "light-dark(#25181766, #25191699)",
-    "--color-overlay-hover": "light-dark(#2518170D, #FFFFFF0D)",
-    "--color-overlay-pressed": "light-dark(#2518171A, #FFFFFF1A)",
-    "--color-text-primary": "light-dark(#251817, #F1DEDB)",
-    "--color-text-secondary": "light-dark(#57423F, #BEA6A1)",
-    "--color-text-disabled": "light-dark(#A38B88, #6F5956)",
-    "--color-text-accent": "light-dark(#A3222A, #F2948B)",
+    "--color-background-surface": "light-dark(#FFFFFF, #111112)",
+    "--color-background-body": "light-dark(#F7F4EE, #0A0A0B)",
+    "--color-background-card": "light-dark(#FAF7F1, #1A1A1C)",
+    "--color-background-popover": "light-dark(#FFFFFF, #222225)",
+    "--color-background-muted": "light-dark(#F1ECE3, #18181A)",
+    "--color-accent": "light-dark(#9A5B00, #F2A33A)",
+    "--color-accent-muted": "light-dark(rgb(154 91 0 / 0.10), rgb(242 163 58 / 0.12))",
+    "--color-neutral": "light-dark(#201A151A, #E9E1D933)",
+    "--color-overlay": "light-dark(#201A1566, #201B1599)",
+    "--color-overlay-hover": "light-dark(rgb(29 27 38 / 0.05), rgb(238 233 224 / 0.06))",
+    "--color-overlay-pressed": "light-dark(rgb(29 27 38 / 0.09), rgb(238 233 224 / 0.10))",
+    "--color-text-primary": "light-dark(#1D1B26, #EEE9E0)",
+    "--color-text-secondary": "light-dark(#565366, #B3AFA7)",
+    "--color-text-disabled": "light-dark(#9A97A6, #6E6B66)",
+    "--color-text-accent": "light-dark(#8A5200, #F5B35A)",
     "--color-on-dark": "#ffffff",
     "--color-on-light": "#111111",
-    "--color-on-accent": "light-dark(#FFFFFF, #FFFFFF)",
+    "--color-on-accent": "light-dark(#FFFFFF, #140E05)",
     "--color-on-success": "light-dark(#ffffff, #111111)",
     "--color-on-error": "light-dark(#ffffff, #111111)",
-    "--color-on-warning": "#111111",
-    "--color-icon-accent": "light-dark(#A3222A, #F2948B)",
-    "--color-icon-primary": "light-dark(#251817, #F1DEDB)",
-    "--color-icon-secondary": "light-dark(#57423F, #BEA6A1)",
-    "--color-icon-disabled": "light-dark(#A38B88, #6F5956)",
-    "--color-success": "light-dark(#00490b, #a4d6a3)",
-    "--color-error": "light-dark(#76000c, #ffc4be)",
-    "--color-warning": "light-dark(#4b3900, #f8d36a)",
+    "--color-on-warning": "light-dark(#FFFFFF, #1F0A0A)",
+    "--color-icon-accent": "light-dark(#8A5200, #F5B35A)",
+    "--color-icon-primary": "light-dark(#1D1B26, #E6E1D8)",
+    "--color-icon-secondary": "light-dark(#565366, #A6A29A)",
+    "--color-icon-disabled": "light-dark(#9B8E84, #675C52)",
+    "--color-success": "light-dark(#1E7A4C, #5BD49A)",
+    "--color-error": "light-dark(#B3261E, #FF6B6B)",
+    "--color-warning": "light-dark(#B3261E, #FF8A7A)",
     "--color-success-muted": "light-dark(#bce0bb, #90ca903D)",
     "--color-error-muted": "light-dark(#ffc4be, #ff98903D)",
-    "--color-warning-muted": "light-dark(#fae19e, #e2b6233D)",
-    "--color-border": "light-dark(#E7E1D8, #2B3632)",
-    "--color-border-emphasized": "light-dark(#A38B88, #79635F)",
-    "--color-skeleton": "light-dark(#BFA5A2, #56423E)",
+    "--color-warning-muted": "light-dark(rgb(179 38 30 / 0.10), rgb(229 72 77 / 0.16))",
+    "--color-border": "light-dark(#E6DFD3, #2A2A2E)",
+    "--color-border-emphasized": "light-dark(#8E8574, #76767F)",
+    "--color-skeleton": "light-dark(#B6A99E, #4F453B)",
     "--color-shadow": "light-dark(#0000001A, #0000004D)",
     "--color-tint-hover": "light-dark(black, white)",
     "--color-background-red": "light-dark(#ffc4be, #5b2b28)",
@@ -161,8 +161,8 @@ export const pujoTheme = {
     "--color-text-cyan": "light-dark(#004351, #85d5e9)",
     "--color-background-blue": "light-dark(#b9d7ff, #253c5a)",
     "--color-border-blue": "light-dark(#a1caff, #5aa0f8)",
-    "--color-icon-blue": "light-dark(#003978, #88bcff)",
-    "--color-text-blue": "light-dark(#003978, #a1caff)",
+    "--color-icon-blue": "light-dark(#2F5F8A, #8FB8D9)",
+    "--color-text-blue": "light-dark(#2F5F8A, #8FB8D9)",
     "--color-background-purple": "light-dark(#f7d5ff, #4a2f51)",
     "--color-border-purple": "light-dark(#f3bfff, #d885eb)",
     "--color-icon-purple": "light-dark(#5c0e6c, #e496f6)",
@@ -181,18 +181,18 @@ export const pujoTheme = {
     "--radius-container": "16px",
     "--radius-page": "32px",
     "--radius-full": "9999px",
-    "--shadow-low": "0 1px 2px light-dark(rgb(20 28 26 / 0.05), rgb(0 0 0 / 0.22)), 0 2px 6px light-dark(rgb(20 28 26 / 0.05), rgb(0 0 0 / 0.18))",
-    "--shadow-med": "0 8px 24px -8px light-dark(rgb(20 28 26 / 0.12), rgb(0 0 0 / 0.36))",
-    "--shadow-high": "0 18px 44px -14px light-dark(rgb(20 28 26 / 0.16), rgb(0 0 0 / 0.42))",
+    "--shadow-low": "0 1px 2px light-dark(rgb(17 20 35 / 0.05), rgb(0 0 0 / 0.24)), 0 2px 6px light-dark(rgb(17 20 35 / 0.05), rgb(0 0 0 / 0.18))",
+    "--shadow-med": "0 8px 24px -8px light-dark(rgb(17 20 35 / 0.14), rgb(0 0 0 / 0.40))",
+    "--shadow-high": "0 18px 44px -14px light-dark(rgb(17 20 35 / 0.18), rgb(0 0 0 / 0.48))",
     "--shadow-inset-hover": "inset 0px 0px 0px 2px #0074e24D",
     "--shadow-inset-selected": "inset 0px 0px 0px 2px #0074e280",
     "--shadow-inset-success": "inset 0px 0px 0px 2px #2f7d334D",
     "--shadow-inset-warning": "inset 0px 0px 0px 2px #f8d36a4D",
     "--shadow-inset-error": "inset 0px 0px 0px 2px #de47454D",
-    "--color-background-inverted": "light-dark(#251817, #FFFBFA)",
-    "--color-track": "light-dark(#BFA5A2, #56423E)",
+    "--color-background-inverted": "light-dark(#201A15, #FFFBF6)",
+    "--color-track": "light-dark(#B6A99E, #4F453B)",
     "--radius-chat": "56px",
-    "--focus-outline-color": "light-dark(#B8282F, #E8B65A)"
+    "--focus-outline-color": "light-dark(#2F5F8A, #8FB8D9)"
   },
   localTokens: {
     "--astryx-theme-neutral-color-status-fill-accent": "light-dark(#0074e2, #6d9cfe)",
@@ -205,10 +205,12 @@ export const pujoTheme = {
     "--astryx-theme-neutral-color-on-tint-overlay-pressed": "light-dark(#fafafa33, #0a0a0a33)",
     "--astryx-theme-neutral-color-destructive-overlay-hover": "light-dark(#ff7f770D, #ee736c0D)",
     "--astryx-theme-neutral-color-destructive-overlay-pressed": "light-dark(#ff7f771A, #ee736c1A)",
-    "--pujo-holud": "light-dark(#8A5A00, #E8B65A)",
-    "--pujo-sabuj": "light-dark(#24524A, #8FCFBD)",
-    "--pujo-sabuj-solid": "#1F4A44",
-    "--pujo-holud-solid": "#E0A43A"
+    "--pujo-marigold": "light-dark(#9A5B00, #F2A33A)",
+    "--pujo-dusk": "light-dark(#2F5F8A, #8FB8D9)",
+    "--pujo-pin": "#F2A33A",
+    "--pujo-pin-ink": "#111423",
+    "--pujo-pin-must": "#8FB8D9",
+    "--pujo-start": "#2F5F8A"
   },
   __localTokenOwners: {
     "--astryx-theme-neutral-color-status-fill-accent": "neutral",
@@ -221,10 +223,12 @@ export const pujoTheme = {
     "--astryx-theme-neutral-color-on-tint-overlay-pressed": "neutral",
     "--astryx-theme-neutral-color-destructive-overlay-hover": "neutral",
     "--astryx-theme-neutral-color-destructive-overlay-pressed": "neutral",
-    "--pujo-holud": "pujo",
-    "--pujo-sabuj": "pujo",
-    "--pujo-sabuj-solid": "pujo",
-    "--pujo-holud-solid": "pujo"
+    "--pujo-marigold": "pujo",
+    "--pujo-dusk": "pujo",
+    "--pujo-pin": "pujo",
+    "--pujo-pin-ink": "pujo",
+    "--pujo-pin-must": "pujo",
+    "--pujo-start": "pujo"
   },
   __localTokenLineage: ["neutral","pujo"],
   components: {
@@ -285,7 +289,7 @@ export const pujoTheme = {
         "fontSize": "var(--font-size-xl)",
         "lineHeight": "1.3",
         "fontWeight": "var(--font-weight-semibold)",
-        "color": "var(--pujo-holud)"
+        "color": "var(--pujo-marigold)"
       }
     },
     "text": {
@@ -469,7 +473,10 @@ export const pujoTheme = {
       "status:warning": {
         "--color-text-primary": "var(--color-text-yellow)",
         "--color-text-secondary": "var(--color-text-yellow)",
-        "--color-warning": "var(--color-text-yellow)"
+        "--color-warning": "var(--color-text-yellow)",
+        "--color-text-yellow": "var(--color-warning)",
+        "--color-icon-yellow": "var(--color-warning)",
+        "--color-text-accent": "var(--color-warning)"
       },
       "status:error": {
         "--color-text-primary": "var(--color-text-red)",
@@ -535,6 +542,16 @@ export const pujoTheme = {
         "backgroundColor": "var(--color-accent)",
         "borderColor": "var(--color-accent)",
         "color": "var(--color-on-accent)"
+      }
+    },
+    "banner-icon": {
+      "status:warning": {
+        "color": "var(--color-warning)"
+      }
+    },
+    "banner-description": {
+      "base": {
+        "color": "var(--color-text-primary)"
       }
     }
   },
@@ -605,10 +622,10 @@ export const pujoTheme = {
     },
     "color": {
       "accent": [
-        "#B8282F",
-        "#C93A33"
+        "#9A5B00",
+        "#F2A33A"
       ],
-      "neutralStyle": "warm",
+      "neutralStyle": "cool",
       "contrast": "standard"
     },
     "radius": {
