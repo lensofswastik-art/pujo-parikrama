@@ -28,16 +28,21 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
 .search-field {
   flex: 7 1 0; min-width: 0;
   background: var(--color-background-surface);
-  border-radius: var(--radius-full);
+  border-radius: var(--pujo-radius-control);
+  min-height: var(--pujo-control-height);
   padding-inline: var(--spacing-1);
   box-shadow: var(--shadow-med);
 }
 .search-field > :first-child { flex: 1 1 auto; min-width: 0; }
 .search-toggle { flex: 3 1 0; min-width: 9.5rem; }
 .search-toggle > * { width: 100%; box-shadow: var(--shadow-med); }
-/* Pill toggle: outer radius full, 4px padding, segments full → concentric. */
-.search-toggle .astryx-segmented-control { border-radius: var(--radius-full); padding: var(--spacing-1); }
-.search-toggle .astryx-segmented-control-item { border-radius: var(--radius-full); }
+/* Toggle: 8px outer, 4px padding, 4px segments → concentric; same height as search. */
+.search-toggle { align-self: stretch; }
+.search-toggle .astryx-segmented-control {
+  border-radius: var(--pujo-radius-control); padding: var(--spacing-1);
+  height: 100%; min-height: var(--pujo-control-height); align-items: stretch;
+}
+.search-toggle .astryx-segmented-control-item { border-radius: var(--pujo-radius-segment); height: auto; min-height: 0; }
 
 /* Quick picks: one swipeable row on phones, running to the screen edges. */
 .capsules {
@@ -54,7 +59,7 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
   inset-inline: var(--spacing-2); bottom: var(--spacing-2);
   height: calc(90dvh - var(--spacing-2));
   background: var(--color-background-surface);
-  border-radius: var(--radius-page);
+  border-radius: var(--pujo-radius-widget);
   box-shadow: var(--shadow-high);
   overflow: hidden;
   transform: translateY(calc(90dvh - var(--snap, 200px)));
@@ -88,32 +93,39 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
 
 /* ── Desktop: floating panel over a full-bleed map ── */
 @media (min-width: 900px) {
+  /* Two floating widgets stacked in one column: search above, list below. */
   .side {
-    display: flex; position: absolute; z-index: 5;
+    display: flex; flex-direction: column; gap: var(--spacing-3);
+    position: absolute; z-index: 5;
     top: var(--spacing-4); bottom: var(--spacing-4); inset-inline-start: var(--spacing-4);
     width: 25rem;
-    background: var(--color-background-surface);
-    border-radius: var(--radius-page);
-    box-shadow: var(--shadow-high);
-    overflow: hidden;
   }
-  .top { position: relative; padding: var(--spacing-4) var(--spacing-4) 0; }
+  .top {
+    position: relative; flex: none;
+    padding: var(--spacing-4);
+    background: var(--color-background-surface);
+    border-radius: var(--pujo-radius-widget);
+    box-shadow: var(--shadow-high);
+  }
   .search-field, .search-toggle > * { box-shadow: none; }
   .search-field { background: var(--color-background-card); }
   .search-toggle { min-width: 8.5rem; }
   .capsules {
-    flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; max-height: 7.5rem;
-    margin-inline: 0; padding: var(--spacing-0-5) 0 var(--spacing-3);
+    flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; max-height: 7.25rem;
+    margin-inline: 0; padding: var(--spacing-0-5) 0 var(--spacing-2);
     -webkit-mask-image: linear-gradient(#000 calc(100% - 1.25rem), transparent);
     mask-image: linear-gradient(#000 calc(100% - 1.25rem), transparent);
   }
   .capsules > * { box-shadow: none; }
   .sheet {
     position: relative; inset: auto; height: auto; flex: 1 1 auto; min-height: 0;
-    transform: none !important; border-radius: 0; box-shadow: none; background: transparent;
+    transform: none !important;
+    background: var(--color-background-surface);
+    border-radius: var(--pujo-radius-widget);
+    box-shadow: var(--shadow-high);
   }
   .grab { display: none; }
-  .sheet-handle { touch-action: auto; padding-top: var(--spacing-2); }
+  .sheet-handle { touch-action: auto; padding-top: var(--spacing-4); }
   .map-tools { bottom: var(--spacing-6); inset-inline-end: var(--spacing-5); }
   .toast { inset-inline: auto var(--spacing-5); top: var(--spacing-4); width: 22rem; }
 }
@@ -155,7 +167,7 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
 .mk-start-label {
   background: var(--color-background-popover); color: var(--color-text-primary);
   border-radius: var(--radius-element); box-shadow: var(--shadow-low);
-  font-family: var(--font-family-body); font-size: var(--font-size-xsm); font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-body); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);
   padding: var(--spacing-0-5) var(--spacing-2); white-space: nowrap;
 }
 
@@ -167,3 +179,14 @@ html, body { height: 100%; overflow: hidden; background: var(--color-background-
 @media (min-width: 900px) {
   .search-toggle { flex: 0 0 9.5rem; }
 }
+
+/* Quick-pick chips: compact, balanced with the 12px label. */
+.capsules button { min-height: 1.75rem; padding-inline: var(--spacing-3); border-radius: var(--pujo-radius-control); }
+
+/* Selected list row: pressed-in, with a faint marigold edge. */
+.sheet-body [aria-selected="true"] {
+  border-radius: var(--radius-element);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.30), inset 0 0 0 1px rgb(242 163 58 / 0.35);
+}
+.capsules .astryx-toggle-button,
+.capsules button, .capsules button * { font-size: var(--pujo-chip-font); line-height: 1.2; }
